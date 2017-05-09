@@ -1,8 +1,9 @@
-﻿<Application
-    x:Class="PushNotify.App"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:PushNotify"
-    RequestedTheme="Light">
+﻿<common:BootStrapper
+  x:Class="PushNotify.App"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:local="using:PushNotify"
+  xmlns:common="using:Template10.Common"
+  RequestedTheme="Light">
 
-</Application>
+</common:BootStrapper>
