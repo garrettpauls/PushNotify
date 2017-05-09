@@ -14,6 +14,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Readme.md = Readme.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PushNotify.Core.Tests", "tests\PushNotify.Core.Tests\PushNotify.Core.Tests.csproj", "{B4F70142-31F3-41FF-A778-0B0E41018A2C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -62,6 +64,26 @@ Global
 		{A991A9EF-FD32-4A53-AFFE-0D9CE5A69200}.Release|x64.Build.0 = Release|x64
 		{A991A9EF-FD32-4A53-AFFE-0D9CE5A69200}.Release|x86.ActiveCfg = Release|x86
 		{A991A9EF-FD32-4A53-AFFE-0D9CE5A69200}.Release|x86.Build.0 = Release|x86
+		{B4F70142-31F3-41FF-A778-0B0E41018A2C}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{B4F70142-31F3-41FF-A778-0B0E41018A2C}.Debug|ARM.ActiveCfg = Debug|ARM
+		{B4F70142-31F3-41FF-A778-0B0E41018A2C}.Debug|ARM.Build.0 = Debug|ARM
+		{B4F70142-31F3-41FF-A778-0B0E41018A2C}.Debug|ARM.Deploy.0 = Debug|ARM
+		{B4F70142-31F3-41FF-A778-0B0E41018A2C}.Debug|x64.ActiveCfg = Debug|x64
+		{B4F70142-31F3-41FF-A778-0B0E41018A2C}.Debug|x64.Build.0 = Debug|x64
+		{B4F70142-31F3-41FF-A778-0B0E41018A2C}.Debug|x64.Deploy.0 = Debug|x64
+		{B4F70142-31F3-41FF-A778-0B0E41018A2C}.Debug|x86.ActiveCfg = Debug|x86
+		{B4F70142-31F3-41FF-A778-0B0E41018A2C}.Debug|x86.Build.0 = Debug|x86
+		{B4F70142-31F3-41FF-A778-0B0E41018A2C}.Debug|x86.Deploy.0 = Debug|x86
+		{B4F70142-31F3-41FF-A778-0B0E41018A2C}.Release|Any CPU.ActiveCfg = Release|x86
+		{B4F70142-31F3-41FF-A778-0B0E41018A2C}.Release|ARM.ActiveCfg = Release|ARM
+		{B4F70142-31F3-41FF-A778-0B0E41018A2C}.Release|ARM.Build.0 = Release|ARM
+		{B4F70142-31F3-41FF-A778-0B0E41018A2C}.Release|ARM.Deploy.0 = Release|ARM
+		{B4F70142-31F3-41FF-A778-0B0E41018A2C}.Release|x64.ActiveCfg = Release|x64
+		{B4F70142-31F3-41FF-A778-0B0E41018A2C}.Release|x64.Build.0 = Release|x64
+		{B4F70142-31F3-41FF-A778-0B0E41018A2C}.Release|x64.Deploy.0 = Release|x64
+		{B4F70142-31F3-41FF-A778-0B0E41018A2C}.Release|x86.ActiveCfg = Release|x86
+		{B4F70142-31F3-41FF-A778-0B0E41018A2C}.Release|x86.Build.0 = Release|x86
+		{B4F70142-31F3-41FF-A778-0B0E41018A2C}.Release|x86.Deploy.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
