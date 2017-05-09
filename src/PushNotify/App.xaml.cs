@@ -23,9 +23,10 @@ namespace PushNotify
         private IContainer _BuildContainer()
         {
             var builder = new ContainerBuilder();
-
+            
             builder.RegisterModule<ViewsModule>();
             builder.RegisterModule<ServicesModule>();
+            builder.RegisterInstance(typeof(App).GetTypeInfo().Assembly.GetName()).As<AssemblyName>().SingleInstance();
 
             return builder.Build();
         }

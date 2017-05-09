@@ -1,7 +1,5 @@
 ﻿using Autofac;
 
-using PushNotify.Core.Authentication;
-
 namespace PushNotify.Core.Services
 {
     public sealed class ServicesModule : Module
