@@ -1,4 +1,10 @@
-﻿using Autofac;
+﻿using System.Reflection;
+
+using Autofac;
+
+using Template10.Mvvm;
+
+using Module = Autofac.Module;
 
 namespace PushNotify.Views
 {
@@ -6,7 +12,11 @@ namespace PushNotify.Views
     {
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterType<MainPageViewModel>().AsSelf().InstancePerDependency();
+            builder.RegisterAssemblyTypes(typeof(ViewsModule).GetTypeInfo().Assembly)
+                   .InNamespaceOf<ViewsModule>()
+                   .AssignableTo<ViewModelBase>()
+                   .AsSelf()
+                   .InstancePerDependency();
         }
     }
 }

@@ -23,7 +23,7 @@ namespace PushNotify
         private IContainer _BuildContainer()
         {
             var builder = new ContainerBuilder();
-            
+
             builder.RegisterModule<ViewsModule>();
             builder.RegisterModule<ServicesModule>();
             builder.RegisterInstance(typeof(App).GetTypeInfo().Assembly.GetName()).As<AssemblyName>().SingleInstance();
@@ -31,11 +31,20 @@ namespace PushNotify
             return builder.Build();
         }
 
-        public override Task OnStartAsync(StartKind startKind, IActivatedEventArgs args)
+        public override async Task OnStartAsync(StartKind startKind, IActivatedEventArgs args)
         {
             mContainer = _BuildContainer();
 
-            return NavigationService.NavigateAsync(typeof(MainPage));
+            var authService = mContainer.Resolve<IAuthenticationService>();
+
+            if(authService.TryGetCachedAuth(out _))
+            {
+                await NavigationService.NavigateAsync(typeof(MainPage));
+            }
+            else
+            {
+                await NavigationService.NavigateAsync(typeof(LoginPage));
+            }
         }
 
         public override INavigable ResolveForPage(Page page, NavigationService navigationService)
