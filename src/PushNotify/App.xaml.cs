@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 using Windows.ApplicationModel.Activation;
 using Windows.UI.Xaml.Controls;
 
+using Autofac;
+
+using PushNotify.Core.Services;
 using PushNotify.Views;
 
 using Template10.Common;
@@ -15,8 +18,22 @@ namespace PushNotify
 {
     public sealed partial class App : BootStrapper
     {
+        private IContainer mContainer;
+
+        private IContainer _BuildContainer()
+        {
+            var builder = new ContainerBuilder();
+
+            builder.RegisterModule<ViewsModule>();
+            builder.RegisterModule<ServicesModule>();
+
+            return builder.Build();
+        }
+
         public override Task OnStartAsync(StartKind startKind, IActivatedEventArgs args)
         {
+            mContainer = _BuildContainer();
+
             return NavigationService.NavigateAsync(typeof(MainPage));
         }
 
@@ -26,7 +43,7 @@ namespace PushNotify
 
             if(vmType?.GetInterfaces().Contains(typeof(INavigable)) ?? false)
             {
-                return (INavigable) Activator.CreateInstance(vmType);
+                return (INavigable) mContainer.Resolve(vmType);
             }
 
             return null;
