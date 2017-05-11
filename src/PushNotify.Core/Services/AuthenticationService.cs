@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Windows.Data.Json;
 using Windows.Web.Http;
 
+using LanguageExt;
+
 using PushNotify.Core.Models;
 
 namespace PushNotify.Core.Services
@@ -14,7 +16,7 @@ namespace PushNotify.Core.Services
     {
         bool TryGetCachedAuth(out PushoverAuth auth);
 
-        Task<PushoverAuth> TryLogin(string email, string password);
+        Task<Option<PushoverAuth>> TryLogin(string email, string password);
     }
 
     public sealed class AuthenticationService : IAuthenticationService
@@ -42,8 +44,9 @@ namespace PushNotify.Core.Services
             return mConfig.TryGetAuthentication(out auth);
         }
 
-        public async Task<PushoverAuth> TryLogin(string email, string password)
+        public async Task<Option<PushoverAuth>> TryLogin(string email, string password)
         {
+            await Task.Delay(2000);
             using(var client = _CreateHttpClient())
             {
                 var payload = new HttpFormUrlEncodedContent(new Dictionary<string, string>

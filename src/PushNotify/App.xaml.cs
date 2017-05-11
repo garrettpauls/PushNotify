@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -9,6 +8,7 @@ using Windows.UI.Xaml.Controls;
 using Autofac;
 
 using PushNotify.Core.Services;
+using PushNotify.Framework.Xaml;
 using PushNotify.Views;
 
 using Template10.Common;
@@ -49,10 +49,13 @@ namespace PushNotify
 
         public override INavigable ResolveForPage(Page page, NavigationService navigationService)
         {
-            var vmType = Type.GetType(page.GetType().FullName + "ViewModel", false);
+            var hasViewModel = page.GetType()
+                                   .GetInterfaces()
+                                   .FirstOrDefault(iface => iface.IsClosedTypeOf(typeof(IHasViewModel<>)));
 
-            if(vmType?.GetInterfaces().Contains(typeof(INavigable)) ?? false)
+            if(hasViewModel != null)
             {
+                var vmType = hasViewModel.GenericTypeArguments[0];
                 return (INavigable) mContainer.Resolve(vmType);
             }
 

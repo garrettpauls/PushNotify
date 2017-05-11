@@ -4,6 +4,30 @@
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   xmlns:local="using:PushNotify"
   xmlns:common="using:Template10.Common"
+  xmlns:converters="using:Template10.Converters"
   RequestedTheme="Light">
-
+  <common:BootStrapper.Resources>
+    <converters:ValueWhenConverter x:Key="Convert_BoolToReverse">
+      <converters:ValueWhenConverter.When>
+        <x:Boolean>True</x:Boolean>
+      </converters:ValueWhenConverter.When>
+      <converters:ValueWhenConverter.Value>
+        <x:Boolean>False</x:Boolean>
+      </converters:ValueWhenConverter.Value>
+      <converters:ValueWhenConverter.Otherwise>
+        <x:Boolean>True</x:Boolean>
+      </converters:ValueWhenConverter.Otherwise>
+    </converters:ValueWhenConverter>
+    <converters:ValueWhenConverter x:Key="Convert_BoolToVisibleCollapsed">
+      <converters:ValueWhenConverter.When>
+        <x:Boolean>True</x:Boolean>
+      </converters:ValueWhenConverter.When>
+      <converters:ValueWhenConverter.Value>
+        <Visibility>Visible</Visibility>
+      </converters:ValueWhenConverter.Value>
+      <converters:ValueWhenConverter.Otherwise>
+        <Visibility>Collapsed</Visibility>
+      </converters:ValueWhenConverter.Otherwise>
+    </converters:ValueWhenConverter>
+  </common:BootStrapper.Resources>
 </common:BootStrapper>
