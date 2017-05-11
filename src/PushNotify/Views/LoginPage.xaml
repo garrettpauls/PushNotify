@@ -37,6 +37,7 @@
                  IsEnabled="{x:Bind ViewModel.IsLoggingIn, Mode=OneWay, Converter={StaticResource Convert_BoolToReverse}}" />
         <PasswordBox Header="Password" Password="{x:Bind ViewModel.Password, Mode=TwoWay}"
                      IsEnabled="{x:Bind ViewModel.IsLoggingIn, Mode=OneWay, Converter={StaticResource Convert_BoolToReverse}}" />
+        <TextBox Header="Device Name" Text="{x:Bind ViewModel.DeviceName, Mode=TwoWay}" MaxLength="25" />
         <TextBlock Text="Login failed, verify your email/password and try again." TextWrapping="Wrap" Margin="0 4"
                    Visibility="{x:Bind ViewModel.LoginFailed, Mode=OneWay, Converter={StaticResource Convert_BoolToVisibleCollapsed}}" />
         <Button Margin="0 4" HorizontalAlignment="Stretch" Command="{x:Bind ViewModel.LoginCommand}"

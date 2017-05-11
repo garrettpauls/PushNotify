@@ -16,7 +16,7 @@ namespace PushNotify.Core.Services
     {
         bool TryGetCachedAuth(out PushoverAuth auth);
 
-        Task<Option<PushoverAuth>> TryLogin(string email, string password);
+        Task<Option<PushoverAuth>> TryLogin(string email, string password, string deviceName);
     }
 
     public sealed class AuthenticationService : IAuthenticationService
@@ -39,14 +39,42 @@ namespace PushNotify.Core.Services
             return client;
         }
 
+        private async Task<Option<string>> _RegisterDevice(HttpClient client, string secret, string deviceName)
+        {
+            var payload = new HttpFormUrlEncodedContent(new Dictionary<string, string>
+            {
+                ["secret"] = secret,
+                ["name"] = deviceName,
+                ["os"] = "O"
+            });
+
+            var response = await client.PostAsync(new Uri("https://api.pushover.net/1/devices.json"), payload);
+            if(!response.IsSuccessStatusCode)
+            {
+                return null;
+            }
+
+            var content = await response.Content.ReadAsStringAsync();
+
+            var result = JsonObject.Parse(content);
+            if(result["status"].Stringify() != "1")
+            {
+                // TODO: nicely report errors
+                return null;
+            }
+
+            var id = result["id"].GetString();
+
+            return id;
+        }
+
         public bool TryGetCachedAuth(out PushoverAuth auth)
         {
             return mConfig.TryGetAuthentication(out auth);
         }
 
-        public async Task<Option<PushoverAuth>> TryLogin(string email, string password)
+        public async Task<Option<PushoverAuth>> TryLogin(string email, string password, string deviceName)
         {
-            await Task.Delay(2000);
             using(var client = _CreateHttpClient())
             {
                 var payload = new HttpFormUrlEncodedContent(new Dictionary<string, string>
@@ -69,12 +97,13 @@ namespace PushNotify.Core.Services
                     return null;
                 }
 
-                var id = result["id"].GetString();
                 var secret = result["secret"].GetString();
 
-                var auth = new PushoverAuth(id, secret);
+                var deviceId = await _RegisterDevice(client, secret, deviceName);
 
-                mConfig.SetAuthentication(auth);
+                var auth = deviceId.Map(id => new PushoverAuth(id, secret));
+
+                auth.IfSome(x => mConfig.SetAuthentication(x));
 
                 return auth;
             }

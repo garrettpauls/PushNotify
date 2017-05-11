@@ -10,6 +10,7 @@ namespace PushNotify.Views
     public sealed class LoginPageViewModel : ViewModelBase
     {
         private readonly IAuthenticationService mAuthService;
+        private string mDeviceName;
         private string mEmail;
         private bool mIsLoggingIn;
         private bool mLoginFailed;
@@ -19,6 +20,12 @@ namespace PushNotify.Views
         {
             mAuthService = authService;
             LoginCommand = new DelegateCommand(Login);
+        }
+
+        public string DeviceName
+        {
+            get => mDeviceName;
+            set => Set(ref mDeviceName, value);
         }
 
         public string Email
@@ -64,13 +71,13 @@ namespace PushNotify.Views
         {
             IsLoggingIn = true;
 
-            if(string.IsNullOrWhiteSpace(Email) || string.IsNullOrEmpty(Password))
+            if(string.IsNullOrWhiteSpace(Email) || string.IsNullOrEmpty(Password) || string.IsNullOrWhiteSpace(DeviceName))
             {
                 await _LoginFailed();
             }
             else
             {
-                var result = await mAuthService.TryLogin(Email, Password);
+                var result = await mAuthService.TryLogin(Email, Password, DeviceName);
 
                 await result.Match(
                     _LoginSuccessful,

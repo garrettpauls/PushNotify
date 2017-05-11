@@ -9,6 +9,10 @@
   mc:Ignorable="d">
 
   <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-    <c:PageHeader Text="Notifications" />
+    <c:PageHeader Text="Notifications">
+      <c:PageHeader.SecondaryCommands>
+        <AppBarButton Label="Logout" Command="{x:Bind ViewModel.LogoutCommand}" />
+      </c:PageHeader.SecondaryCommands>
+    </c:PageHeader>
   </Grid>
 </local:MainPageImpl>

@@ -1,6 +1,10 @@
-﻿using Windows.Foundation.Collections;
+﻿using System.Linq;
+
+using Windows.Foundation.Collections;
 using Windows.Security.Credentials;
 using Windows.Storage;
+
+using LanguageExt;
 
 using PushNotify.Core.Models;
 
@@ -8,7 +12,7 @@ namespace PushNotify.Core.Services
 {
     public interface IConfigService
     {
-        void SetAuthentication(PushoverAuth auth);
+        void SetAuthentication(Option<PushoverAuth> auth);
 
         bool TryGetAuthentication(out PushoverAuth auth);
     }
@@ -26,10 +30,23 @@ namespace PushNotify.Core.Services
             mSettings = ApplicationData.Current.LocalSettings.Values;
         }
 
-        public void SetAuthentication(PushoverAuth auth)
+        public void SetAuthentication(Option<PushoverAuth> auth)
         {
-            mSettings[SETTING_DEVICE_ID] = auth.DeviceId;
-            mVault.Add(new PasswordCredential(VAULT_RESOURCE, auth.DeviceId, auth.Secret));
+            auth.Match(
+                value =>
+                {
+                    mSettings[SETTING_DEVICE_ID] = value.DeviceId;
+                    mVault.Add(new PasswordCredential(VAULT_RESOURCE, value.DeviceId, value.Secret));
+                },
+                () =>
+                {
+                    mSettings.Remove(SETTING_DEVICE_ID);
+                    var credentials = mVault.RetrieveAll().Where(cred => cred.Resource == VAULT_RESOURCE);
+                    foreach(var credential in credentials)
+                    {
+                        mVault.Remove(credential);
+                    }
+                });
         }
 
         public bool TryGetAuthentication(out PushoverAuth auth)
