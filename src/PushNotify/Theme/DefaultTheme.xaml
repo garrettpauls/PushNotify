@@ -1,0 +1,45 @@
+﻿<ResourceDictionary
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:validation="using:Template10.Controls.Validation">
+  <Style TargetType="validation:ControlWrapper">
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Stretch" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="validation:ControlWrapper">
+          <Grid HorizontalAlignment="Stretch" VerticalAlignment="Top">
+            <Rectangle x:Name="Indicator" Width="8" Height="32"
+                       HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                       DataContext="{TemplateBinding Property}" Fill="OrangeRed">
+
+              <ToolTipService.ToolTip>
+                <ToolTip Placement="Mouse">
+                  <ItemsControl ItemsSource="{Binding Errors, Source={TemplateBinding Content}}" />
+                </ToolTip>
+              </ToolTipService.ToolTip>
+
+              <Rectangle.RenderTransform>
+                <TranslateTransform X="-12" />
+              </Rectangle.RenderTransform>
+
+              <Rectangle.Visibility>
+                <Binding Converter="{StaticResource Convert_BoolToCollapsedVisible}" Path="IsValid"
+                         Source="{TemplateBinding Content}" />
+              </Rectangle.Visibility>
+
+            </Rectangle>
+            <ContentPresenter Content="{TemplateBinding Content}"
+                              HorizontalAlignment="{TemplateBinding HorizontalAlignment}"
+                              VerticalAlignment="{TemplateBinding VerticalAlignment}"
+                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+          </Grid>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+</ResourceDictionary>

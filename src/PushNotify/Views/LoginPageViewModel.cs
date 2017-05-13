@@ -1,8 +1,7 @@
 ﻿using System.Threading.Tasks;
-
 using PushNotify.Core.Models;
 using PushNotify.Core.Services;
-
+using PushNotify.Models;
 using Template10.Mvvm;
 
 namespace PushNotify.Views
@@ -10,11 +9,7 @@ namespace PushNotify.Views
     public sealed class LoginPageViewModel : ViewModelBase
     {
         private readonly IAuthenticationService mAuthService;
-        private string mDeviceName;
-        private string mEmail;
         private bool mIsLoggingIn;
-        private bool mLoginFailed;
-        private string mPassword;
 
         public LoginPageViewModel(IAuthenticationService authService)
         {
@@ -22,17 +17,7 @@ namespace PushNotify.Views
             LoginCommand = new DelegateCommand(Login);
         }
 
-        public string DeviceName
-        {
-            get => mDeviceName;
-            set => Set(ref mDeviceName, value);
-        }
-
-        public string Email
-        {
-            get => mEmail;
-            set => Set(ref mEmail, value);
-        }
+        public LoginCredentials Credentials { get; } = new LoginCredentials();
 
         public bool IsLoggingIn
         {
@@ -42,27 +27,15 @@ namespace PushNotify.Views
 
         public DelegateCommand LoginCommand { get; }
 
-        public bool LoginFailed
-        {
-            get => mLoginFailed;
-            private set => Set(ref mLoginFailed, value);
-        }
-
-        public string Password
-        {
-            get => mPassword;
-            set => Set(ref mPassword, value);
-        }
 
         private Task _LoginFailed()
         {
-            LoginFailed = true;
+            Credentials.Errors.Add("Invalid Email/Password combination");
             return Task.CompletedTask;
         }
 
         private async Task _LoginSuccessful(PushoverAuth auth)
         {
-            LoginFailed = false;
             await NavigationService.NavigateAsync(typeof(MainPage));
             NavigationService.ClearHistory();
         }
@@ -71,13 +44,10 @@ namespace PushNotify.Views
         {
             IsLoggingIn = true;
 
-            if(string.IsNullOrWhiteSpace(Email) || string.IsNullOrEmpty(Password) || string.IsNullOrWhiteSpace(DeviceName))
+            if (Credentials.Validate())
             {
-                await _LoginFailed();
-            }
-            else
-            {
-                var result = await mAuthService.TryLogin(Email, Password, DeviceName);
+                var result = await mAuthService.TryLogin(Credentials.Email, Credentials.Password,
+                    Credentials.DeviceName);
 
                 await result.Match(
                     _LoginSuccessful,

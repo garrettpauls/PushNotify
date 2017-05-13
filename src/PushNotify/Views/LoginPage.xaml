@@ -5,7 +5,9 @@
   xmlns:local="using:PushNotify.Views"
   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-  xmlns:c="using:Template10.Controls" Loaded="_HandleLoaded"
+  xmlns:c="using:Template10.Controls"
+  xmlns:validation="using:Template10.Controls.Validation"
+  Loaded="_HandleLoaded"
   mc:Ignorable="d">
 
   <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
@@ -33,18 +35,24 @@
             BorderBrush="{ThemeResource ContentDialogBorderThemeBrush}"
             BorderThickness="1" Margin="4" Padding="4">
       <StackPanel Orientation="Vertical">
-        <TextBox Header="Email" Text="{x:Bind ViewModel.Email, Mode=TwoWay}" x:Name="mTxtEmail"
-                 IsEnabled="{x:Bind ViewModel.IsLoggingIn, Mode=OneWay, Converter={StaticResource Convert_BoolToReverse}}" />
-        <PasswordBox Header="Password" Password="{x:Bind ViewModel.Password, Mode=TwoWay}"
-                     IsEnabled="{x:Bind ViewModel.IsLoggingIn, Mode=OneWay, Converter={StaticResource Convert_BoolToReverse}}" />
-        <TextBox Header="Device Name" Text="{x:Bind ViewModel.DeviceName, Mode=TwoWay}" MaxLength="25" />
-        <TextBlock Text="Login failed, verify your email/password and try again." TextWrapping="Wrap" Margin="0 4"
-                   Visibility="{x:Bind ViewModel.LoginFailed, Mode=OneWay, Converter={StaticResource Convert_BoolToVisibleCollapsed}}" />
+        <validation:ControlWrapper PropertyName="Email" DataContext="{x:Bind ViewModel.Credentials, Mode=OneTime}">
+          <TextBox Header="Email" Text="{x:Bind ViewModel.Credentials.Email, Mode=TwoWay}" x:Name="mTxtEmail"
+                   IsEnabled="{x:Bind ViewModel.IsLoggingIn, Mode=OneWay, Converter={StaticResource Convert_BoolToReverse}}" />
+        </validation:ControlWrapper>
+        <validation:ControlWrapper PropertyName="Password" DataContext="{x:Bind ViewModel.Credentials, Mode=OneTime}">
+          <PasswordBox Header="Password" Password="{x:Bind ViewModel.Credentials.Password, Mode=TwoWay}"
+                       IsEnabled="{x:Bind ViewModel.IsLoggingIn, Mode=OneWay, Converter={StaticResource Convert_BoolToReverse}}" />
+        </validation:ControlWrapper>
+        <validation:ControlWrapper PropertyName="DeviceName" DataContext="{x:Bind ViewModel.Credentials, Mode=OneTime}">
+          <TextBox Header="Device Name" Text="{x:Bind ViewModel.Credentials.DeviceName, Mode=TwoWay}" MaxLength="25" />
+        </validation:ControlWrapper>
+        <!-- TODO: show object errors -->
         <Button Margin="0 4" HorizontalAlignment="Stretch" Command="{x:Bind ViewModel.LoginCommand}"
                 IsEnabled="{x:Bind ViewModel.IsLoggingIn, Mode=OneWay, Converter={StaticResource Convert_BoolToReverse}}">
           <RelativePanel>
             <TextBlock Text="Log in" x:Name="mLoginButtonText"
-                       RelativePanel.AlignHorizontalCenterWithPanel="True" RelativePanel.AlignVerticalCenterWithPanel="True" />
+                       RelativePanel.AlignHorizontalCenterWithPanel="True"
+                       RelativePanel.AlignVerticalCenterWithPanel="True" />
             <ProgressRing IsActive="{x:Bind ViewModel.IsLoggingIn, Mode=OneWay}" Margin="0 0 4 0"
                           RelativePanel.AlignVerticalCenterWithPanel="True" RelativePanel.LeftOf="mLoginButtonText" />
           </RelativePanel>
