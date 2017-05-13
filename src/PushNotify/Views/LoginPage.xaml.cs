@@ -13,7 +13,7 @@ namespace PushNotify.Views
 
         private void _HandleLoaded(object sender, RoutedEventArgs e)
         {
-            mTxtEmail.Focus(FocusState.Keyboard);
+            EmailTextBox.Focus(FocusState.Keyboard);
         }
     }
 

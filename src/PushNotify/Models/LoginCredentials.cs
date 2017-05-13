@@ -29,27 +29,27 @@ namespace PushNotify.Models
 
         public static void DefaultValidator(LoginCredentials model)
         {
-            if (string.IsNullOrEmpty(model.Password))
+            if(string.IsNullOrEmpty(model.Password))
             {
                 model.Properties[nameof(Password)].Errors.Add("Password is required");
             }
-            if (string.IsNullOrWhiteSpace(model.Email))
+            if(string.IsNullOrWhiteSpace(model.Email))
             {
                 model.Properties[nameof(Email)].Errors.Add("Email is required");
             }
 
-            if (string.IsNullOrWhiteSpace(model.DeviceName))
+            if(string.IsNullOrWhiteSpace(model.DeviceName))
             {
                 model.Properties[nameof(DeviceName)].Errors.Add("Device Name is required");
             }
-            else if (model.DeviceName.Length > 25)
+            else if(model.DeviceName.Length > 25)
             {
                 model.Properties[nameof(DeviceName)].Errors.Add("Device Name cannot be longer than 25 characters");
             }
-            else if (!Regex.IsMatch(model.DeviceName, "^[A-Za-z0-9_-]{1,25}$"))
+            else if(!Regex.IsMatch(model.DeviceName, "^[A-Za-z0-9_-]{1,25}$"))
             {
                 model.Properties[nameof(DeviceName)].Errors
-                    .Add("Device Name must only contain basic characters: A-Z, a-z, 0-9, _-");
+                     .Add("Device Name must only contain basic characters: A-Z, a-z, 0-9, _-");
             }
         }
     }

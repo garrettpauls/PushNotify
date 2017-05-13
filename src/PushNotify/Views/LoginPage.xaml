@@ -7,6 +7,7 @@
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
   xmlns:c="using:Template10.Controls"
   xmlns:validation="using:Template10.Controls.Validation"
+  xmlns:controls="using:PushNotify.Controls"
   Loaded="_HandleLoaded"
   mc:Ignorable="d">
 
@@ -35,17 +36,18 @@
             BorderBrush="{ThemeResource ContentDialogBorderThemeBrush}"
             BorderThickness="1" Margin="4" Padding="4">
       <StackPanel Orientation="Vertical">
-        <validation:ControlWrapper PropertyName="Email" DataContext="{x:Bind ViewModel.Credentials, Mode=OneTime}">
-          <TextBox Header="Email" Text="{x:Bind ViewModel.Credentials.Email, Mode=TwoWay}" x:Name="mTxtEmail"
+        <controls:HeaderedValidationWrapper Header="Email" PropertyName="Email" DataContext="{x:Bind ViewModel.Credentials, Mode=OneTime}">
+          <TextBox Text="{x:Bind ViewModel.Credentials.Email, Mode=TwoWay}" x:Name="EmailTextBox"
                    IsEnabled="{x:Bind ViewModel.IsLoggingIn, Mode=OneWay, Converter={StaticResource Convert_BoolToReverse}}" />
-        </validation:ControlWrapper>
-        <validation:ControlWrapper PropertyName="Password" DataContext="{x:Bind ViewModel.Credentials, Mode=OneTime}">
-          <PasswordBox Header="Password" Password="{x:Bind ViewModel.Credentials.Password, Mode=TwoWay}"
+        </controls:HeaderedValidationWrapper>
+        <controls:HeaderedValidationWrapper Header="Password" PropertyName="Password" DataContext="{x:Bind ViewModel.Credentials, Mode=OneTime}">
+          <PasswordBox Password="{x:Bind ViewModel.Credentials.Password, Mode=TwoWay}"
                        IsEnabled="{x:Bind ViewModel.IsLoggingIn, Mode=OneWay, Converter={StaticResource Convert_BoolToReverse}}" />
-        </validation:ControlWrapper>
-        <validation:ControlWrapper PropertyName="DeviceName" DataContext="{x:Bind ViewModel.Credentials, Mode=OneTime}">
-          <TextBox Header="Device Name" Text="{x:Bind ViewModel.Credentials.DeviceName, Mode=TwoWay}" MaxLength="25" />
-        </validation:ControlWrapper>
+        </controls:HeaderedValidationWrapper>
+        <controls:HeaderedValidationWrapper Header="Device Name" PropertyName="DeviceName" DataContext="{x:Bind ViewModel.Credentials, Mode=OneTime}">
+          <TextBox Text="{x:Bind ViewModel.Credentials.DeviceName, Mode=TwoWay}" MaxLength="25"
+                   IsEnabled="{x:Bind ViewModel.IsLoggingIn, Mode=OneWay, Converter={StaticResource Convert_BoolToReverse}}" />
+        </controls:HeaderedValidationWrapper>
         <!-- TODO: show object errors -->
         <Button Margin="0 4" HorizontalAlignment="Stretch" Command="{x:Bind ViewModel.LoginCommand}"
                 IsEnabled="{x:Bind ViewModel.IsLoggingIn, Mode=OneWay, Converter={StaticResource Convert_BoolToReverse}}">

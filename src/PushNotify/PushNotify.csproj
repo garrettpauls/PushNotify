@@ -100,6 +100,8 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\HeaderedValidationWrapper.cs" />
+    <Compile Include="Framework\Xaml\Converters\StringJoinConverter.cs" />
     <Compile Include="Framework\Xaml\IHasViewModel.cs" />
     <Compile Include="Framework\Xaml\Page.cs" />
     <Compile Include="Models\ValidatableModel.cs" />
@@ -136,12 +138,16 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Page Include="Theme\Converters.xaml">
+    <Page Include="Themes\HeaderedValidationWrapper.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Themes\Converters.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Page>
-    <Page Include="Theme\DefaultTheme.xaml">
+    <Page Include="Themes\DefaultTheme.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

@@ -1,8 +1,10 @@
-﻿using System.Linq;
+﻿using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
 using Windows.ApplicationModel.Activation;
+using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
 using Autofac;
@@ -20,6 +22,11 @@ namespace PushNotify
     {
         private IContainer mContainer;
 
+        public App()
+        {
+            UnhandledException += _HandleException;
+        }
+
         private IContainer _BuildContainer()
         {
             var builder = new ContainerBuilder();
@@ -31,10 +38,27 @@ namespace PushNotify
             return builder.Build();
         }
 
-        public override async Task OnStartAsync(StartKind startKind, IActivatedEventArgs args)
+        private void _HandleException(object sender, UnhandledExceptionEventArgs e)
         {
+#if DEBUG
+            Debug.WriteLine(e.Message);
+            Debug.WriteLine(e.Exception);
+#endif
+        }
+
+        public override Task OnInitializeAsync(IActivatedEventArgs args)
+        {
+#if DEBUG
+            DebugSettings.IsBindingTracingEnabled = true;
+#endif
+
             mContainer = _BuildContainer();
 
+            return base.OnInitializeAsync(args);
+        }
+
+        public override async Task OnStartAsync(StartKind startKind, IActivatedEventArgs args)
+        {
             var authService = mContainer.Resolve<IAuthenticationService>();
 
             if(authService.TryGetCachedAuth(out _))

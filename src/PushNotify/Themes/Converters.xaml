@@ -1,0 +1,47 @@
+﻿<ResourceDictionary
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:c10="using:Template10.Converters"
+  xmlns:c="using:PushNotify.Framework.Xaml.Converters">
+  <c:StringJoinConverter x:Name="Convert_JoinStrings" />
+  <c10:ValueWhenConverter x:Key="Convert_BoolToReverse">
+    <c10:ValueWhenConverter.When>
+      <x:Boolean>True</x:Boolean>
+    </c10:ValueWhenConverter.When>
+    <c10:ValueWhenConverter.Value>
+      <x:Boolean>False</x:Boolean>
+    </c10:ValueWhenConverter.Value>
+    <c10:ValueWhenConverter.Otherwise>
+      <x:Boolean>True</x:Boolean>
+    </c10:ValueWhenConverter.Otherwise>
+  </c10:ValueWhenConverter>
+  <c10:ValueWhenConverter x:Key="Convert_BoolToVisibleCollapsed">
+    <c10:ValueWhenConverter.When>
+      <x:Boolean>True</x:Boolean>
+    </c10:ValueWhenConverter.When>
+    <c10:ValueWhenConverter.Value>
+      <Visibility>Visible</Visibility>
+    </c10:ValueWhenConverter.Value>
+    <c10:ValueWhenConverter.Otherwise>
+      <Visibility>Collapsed</Visibility>
+    </c10:ValueWhenConverter.Otherwise>
+  </c10:ValueWhenConverter>
+  <c10:ValueWhenConverter x:Key="Convert_BoolToCollapsedVisible">
+    <c10:ValueWhenConverter.When>
+      <x:Boolean>True</x:Boolean>
+    </c10:ValueWhenConverter.When>
+    <c10:ValueWhenConverter.Value>
+      <Visibility>Collapsed</Visibility>
+    </c10:ValueWhenConverter.Value>
+    <c10:ValueWhenConverter.Otherwise>
+      <Visibility>Visible</Visibility>
+    </c10:ValueWhenConverter.Otherwise>
+  </c10:ValueWhenConverter>
+</ResourceDictionary>
+
+
+
+
+
+
+

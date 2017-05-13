@@ -1,0 +1,52 @@
+<ResourceDictionary
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:local="using:PushNotify.Controls">
+
+  <Style TargetType="local:HeaderedValidationWrapper">
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="VerticalAlignment" Value="Top" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="VerticalContentAlignment" Value="Top" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="Margin" Value="0 4 0 0" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="local:HeaderedValidationWrapper">
+          <Border
+            Background="{TemplateBinding Background}"
+            BorderBrush="{TemplateBinding BorderBrush}"
+            BorderThickness="{TemplateBinding BorderThickness}">
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+              </Grid.ColumnDefinitions>
+              <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+              </Grid.RowDefinitions>
+              <ContentPresenter Grid.Row="0" Grid.Column="0" Content="{TemplateBinding Header}" />
+
+              <FontIcon Grid.Row="0" Grid.Column="1" DataContext="{TemplateBinding Property}" Foreground="OrangeRed" Glyph="&#xE7BA;" FontFamily="Segoe MDL2 Assets"
+                        Margin="4 0" VerticalAlignment="Stretch" HorizontalAlignment="Left"
+                        Visibility="{Binding IsValid, Converter={StaticResource Convert_BoolToCollapsedVisible}}" />
+              <ItemsControl Grid.Row="0" Grid.Column="2" DataContext="{TemplateBinding Property}" IsTabStop="False"
+                            ItemsSource="{Binding Errors}" Visibility="{Binding IsValid, Converter={StaticResource Convert_BoolToCollapsedVisible}}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal" />
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+              </ItemsControl>
+              <ContentPresenter Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
+                                Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"
+                                ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}" />
+            </Grid>
+          </Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+</ResourceDictionary>

@@ -9,8 +9,8 @@
   <common:BootStrapper.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="Theme/Converters.xaml" />
-        <ResourceDictionary Source="Theme/DefaultTheme.xaml" />
+        <ResourceDictionary Source="Themes/Converters.xaml" />
+        <ResourceDictionary Source="Themes/DefaultTheme.xaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </common:BootStrapper.Resources>
