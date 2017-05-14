@@ -1,4 +1,5 @@
 ﻿using System;
+
 using Template10.Interfaces.Validation;
 using Template10.Validation;
 
@@ -17,12 +18,17 @@ namespace PushNotify.Models
                 mValidator = value;
                 base.Validator = (model) =>
                 {
-                    if (model is TSelf self)
+                    if(model is TSelf self)
                     {
                         value(self);
                     }
                 };
             }
+        }
+
+        public void AddError(string propertyName, string message)
+        {
+            Properties[propertyName].Errors.Add(message);
         }
     }
 }

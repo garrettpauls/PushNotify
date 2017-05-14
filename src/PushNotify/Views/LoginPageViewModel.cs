@@ -1,7 +1,9 @@
 ﻿using System.Threading.Tasks;
+
 using PushNotify.Core.Models;
 using PushNotify.Core.Services;
 using PushNotify.Models;
+
 using Template10.Mvvm;
 
 namespace PushNotify.Views
@@ -27,10 +29,10 @@ namespace PushNotify.Views
 
         public DelegateCommand LoginCommand { get; }
 
-
         private Task _LoginFailed()
         {
-            Credentials.Errors.Add("Invalid Email/Password combination");
+            Credentials.AddError(nameof(LoginCredentials.Email), "Login failed");
+            Credentials.AddError(nameof(LoginCredentials.Password), "Login failed");
             return Task.CompletedTask;
         }
 
@@ -44,7 +46,7 @@ namespace PushNotify.Views
         {
             IsLoggingIn = true;
 
-            if (Credentials.Validate())
+            if(Credentials.Validate())
             {
                 var result = await mAuthService.TryLogin(Credentials.Email, Credentials.Password,
                     Credentials.DeviceName);
