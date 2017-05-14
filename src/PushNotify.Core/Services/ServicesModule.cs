@@ -1,5 +1,7 @@
 ﻿using Autofac;
 
+using PushNotify.Core.Services.Pushover;
+
 namespace PushNotify.Core.Services
 {
     public sealed class ServicesModule : Module
@@ -8,6 +10,7 @@ namespace PushNotify.Core.Services
         {
             builder.RegisterType<AuthenticationService>().As<IAuthenticationService>().SingleInstance();
             builder.RegisterType<ConfigService>().As<IConfigService>().SingleInstance();
+            builder.RegisterType<PushoverApi>().As<IPushoverApi>().SingleInstance();
         }
     }
 }
