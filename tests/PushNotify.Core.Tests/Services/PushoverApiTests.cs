@@ -15,6 +15,8 @@ namespace PushNotify.Core.Tests.Services
     [TestClass]
     public sealed class PushoverApiTests
     {
+        private readonly Uri mLoginUri = new Uri("https://api.pushover.net/1/users/login.json");
+
         private (PushoverApi, FakeHttpFilter) _CreateApi()
         {
             var filter = new FakeHttpFilter();
@@ -28,19 +30,11 @@ namespace PushNotify.Core.Tests.Services
         {
             var (service, filter) = _CreateApi();
 
-            filter.ResponseFactory = request =>
+            filter.Responses[mLoginUri] = new HttpResponseMessage(HttpStatusCode.Ok)
             {
-                request.RequestUri.Should().Be(new Uri("https://api.pushover.net/1/users/login.json"));
-                var content = request.Content.Should().BeOfType<HttpFormUrlEncodedContent>().Which;
-                content.Headers.Should().ContainKey("email").WhichValue.Should().Be("email@example.com");
-                content.Headers.Should().ContainKey("password").WhichValue.Should().Be("pass");
-
-                return new HttpResponseMessage(HttpStatusCode.Ok)
-                {
-                    Content = new HttpStringContent(@"{{
+                Content = new HttpStringContent(@"{
 ""status"":0
-}}")
-                };
+}")
             };
 
             var result = service.Login("email@example.com", "pass").Result;
@@ -57,10 +51,12 @@ namespace PushNotify.Core.Tests.Services
 
             filter.ResponseFactory = request =>
             {
-                request.RequestUri.Should().Be(new Uri("https://api.pushover.net/1/users/login.json"));
+                request.RequestUri.Should().Be(mLoginUri);
                 var content = request.Content.Should().BeOfType<HttpFormUrlEncodedContent>().Which;
-                content.Headers.Should().ContainKey("email").WhichValue.Should().Be("email@example.com");
-                content.Headers.Should().ContainKey("password").WhichValue.Should().Be("pass");
+                var actualContent = content.ReadAsStringAsync().GetResults();
+                var unescapedContent = Uri.UnescapeDataString(actualContent);
+                // TODO: update this so it isn't dependent on parameter order
+                unescapedContent.Should().Be("email=email@example.com&password=pass");
 
                 return new HttpResponseMessage(HttpStatusCode.Ok)
                 {

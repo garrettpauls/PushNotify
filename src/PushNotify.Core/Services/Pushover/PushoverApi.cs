@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
 
+using Windows.Data.Json;
 using Windows.Web.Http;
 using Windows.Web.Http.Filters;
 
@@ -11,14 +13,13 @@ namespace PushNotify.Core.Services.Pushover
 {
     public sealed class RegisterDeviceErrors
     {
-        
     }
 
     public interface IPushoverApi
     {
         Task<Option<string>> Login(string email, string password);
 
-        Task<Either<string, RegisterDeviceErrors>> RegisterDevice(string secret, string deviceId);
+        Task<Either<RegisterDeviceErrors, string>> RegisterDevice(string secret, string deviceId);
     }
 
     public sealed class PushoverApi : IPushoverApi
@@ -41,14 +42,66 @@ namespace PushNotify.Core.Services.Pushover
             return client;
         }
 
-        public Task<Option<string>> Login(string email, string password)
+        public async Task<Option<string>> Login(string email, string password)
         {
-            throw new NotImplementedException();
+            using(var client = _CreateClient())
+            {
+                var payload = new HttpFormUrlEncodedContent(new Dictionary<string, string>
+                {
+                    ["email"] = email,
+                    ["password"] = password
+                });
+
+                var response = await client.PostAsync(new Uri("https://api.pushover.net/1/users/login.json"), payload);
+                if(!response.IsSuccessStatusCode)
+                {
+                    return null;
+                }
+
+                var content = await response.Content.ReadAsStringAsync();
+
+                var result = JsonObject.Parse(content);
+                if(result["status"].Stringify() != "1")
+                {
+                    return null;
+                }
+
+                var secret = result["secret"].GetString();
+
+                return secret;
+            }
         }
 
-        public Task<Either<string, RegisterDeviceErrors>> RegisterDevice(string secret, string deviceId)
+        public async Task<Either<RegisterDeviceErrors, string>> RegisterDevice(string secret, string deviceName)
         {
-            throw new NotImplementedException();
+            using(var client = _CreateClient())
+            {
+                var payload = new HttpFormUrlEncodedContent(new Dictionary<string, string>
+                {
+                    ["secret"] = secret,
+                    ["name"] = deviceName,
+                    ["os"] = "O"
+                });
+
+                var response = await client.PostAsync(new Uri("https://api.pushover.net/1/devices.json"), payload);
+                if(!response.IsSuccessStatusCode)
+                {
+                    return new RegisterDeviceErrors();
+                }
+
+                var content = await response.Content.ReadAsStringAsync();
+
+                var result = JsonObject.Parse(content);
+                if(result["status"].Stringify() != "1")
+                {
+                    // TODO: nicely report errors
+                    return new RegisterDeviceErrors();
+                }
+
+                var id = result["id"].GetString();
+
+                return id;
+            }
         }
     }
 }
