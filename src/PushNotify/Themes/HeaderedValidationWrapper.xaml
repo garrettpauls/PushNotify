@@ -32,14 +32,7 @@
               <FontIcon Grid.Row="0" Grid.Column="1" DataContext="{TemplateBinding Property}" Foreground="OrangeRed" Glyph="&#xE7BA;" FontFamily="Segoe MDL2 Assets"
                         Margin="4 0" VerticalAlignment="Stretch" HorizontalAlignment="Left"
                         Visibility="{Binding IsValid, Converter={StaticResource Convert_BoolToCollapsedVisible}}" />
-              <ItemsControl Grid.Row="0" Grid.Column="2" DataContext="{TemplateBinding Property}" IsTabStop="False"
-                            ItemsSource="{Binding Errors}" Visibility="{Binding IsValid, Converter={StaticResource Convert_BoolToCollapsedVisible}}">
-                <ItemsControl.ItemsPanel>
-                  <ItemsPanelTemplate>
-                    <StackPanel Orientation="Horizontal" />
-                  </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-              </ItemsControl>
+              <TextBlock Grid.Row="0" Grid.Column="2" Text="{TemplateBinding ErrorMessage}" TextTrimming="CharacterEllipsis" />
               <ContentPresenter Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
                                 Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"
                                 ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}" />
