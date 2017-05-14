@@ -20,9 +20,21 @@ namespace PushNotify.Core.Tests.Services
         private (PushoverApi, FakeHttpFilter) _CreateApi()
         {
             var filter = new FakeHttpFilter();
-            var api = new PushoverApi(GetType().GetTypeInfo().Assembly.GetName(), filter);
+            var api = new PushoverApi(GetType().GetTypeInfo().Assembly.GetName(), () => filter);
 
             return (api, filter);
+        }
+
+        [TestMethod]
+        public void LoginBadHttpStatusCode()
+        {
+            var (service, filter) = _CreateApi();
+
+            filter.Responses[mLoginUri] = new HttpResponseMessage(HttpStatusCode.BadRequest);
+
+            var result = service.Login("email@example.com", "pass").Result;
+
+            result.IfSome(secret => Assert.Fail($"Unexpected successful result: {secret}"));
         }
 
         [TestMethod]

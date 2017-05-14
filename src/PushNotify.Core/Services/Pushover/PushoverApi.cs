@@ -3,18 +3,15 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
 
-using Windows.Data.Json;
 using Windows.Web.Http;
 using Windows.Web.Http.Filters;
 
 using LanguageExt;
 
+using PushNotify.Core.Services.Pushover.Responses;
+
 namespace PushNotify.Core.Services.Pushover
 {
-    public sealed class RegisterDeviceErrors
-    {
-    }
-
     public interface IPushoverApi
     {
         Task<Option<string>> Login(string email, string password);
@@ -25,17 +22,17 @@ namespace PushNotify.Core.Services.Pushover
     public sealed class PushoverApi : IPushoverApi
     {
         private readonly AssemblyName mAppInfo;
-        private readonly IHttpFilter mFilter;
+        private readonly Func<IHttpFilter> mFilterFactory;
 
-        public PushoverApi(AssemblyName appInfo, IHttpFilter filter = null)
+        public PushoverApi(AssemblyName appInfo, Func<IHttpFilter> filterFactory = null)
         {
             mAppInfo = appInfo;
-            mFilter = filter ?? new HttpBaseProtocolFilter();
+            mFilterFactory = filterFactory ?? (() => new HttpBaseProtocolFilter());
         }
 
         private HttpClient _CreateClient()
         {
-            var client = new HttpClient(mFilter);
+            var client = new HttpClient(mFilterFactory());
 
             client.DefaultRequestHeaders.UserAgent.ParseAdd($"{mAppInfo.Name}/{mAppInfo.Version}");
 
@@ -59,16 +56,14 @@ namespace PushNotify.Core.Services.Pushover
                 }
 
                 var content = await response.Content.ReadAsStringAsync();
+                var result = Json.Read<LoginResponse>(content);
 
-                var result = JsonObject.Parse(content);
-                if(result["status"].Stringify() != "1")
+                if(!result.IsSuccessful)
                 {
                     return null;
                 }
 
-                var secret = result["secret"].GetString();
-
-                return secret;
+                return result.Secret;
             }
         }
 
@@ -84,23 +79,20 @@ namespace PushNotify.Core.Services.Pushover
                 });
 
                 var response = await client.PostAsync(new Uri("https://api.pushover.net/1/devices.json"), payload);
-                if(!response.IsSuccessStatusCode)
-                {
-                    return new RegisterDeviceErrors();
-                }
-
                 var content = await response.Content.ReadAsStringAsync();
 
-                var result = JsonObject.Parse(content);
-                if(result["status"].Stringify() != "1")
+                var json = Json.Read<RegisterDeviceResponse>(content);
+                if(json == null)
                 {
-                    // TODO: nicely report errors
-                    return new RegisterDeviceErrors();
+                    return new RegisterDeviceErrors(new[] {"Unknown error registering device."});
                 }
 
-                var id = result["id"].GetString();
+                if(!json.IsSuccessful)
+                {
+                    return new RegisterDeviceErrors(json.Errors["name"]);
+                }
 
-                return id;
+                return json.Id;
             }
         }
     }
