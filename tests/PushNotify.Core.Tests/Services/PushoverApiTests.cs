@@ -1,13 +1,11 @@
 ﻿using System;
+using System.Linq;
 using System.Reflection;
-
 using Windows.Web.Http;
-
 using FluentAssertions;
-
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 using PushNotify.Core.Services.Pushover;
+using PushNotify.Core.Services.Pushover.Responses;
 using PushNotify.Core.Tests.Fakes;
 
 namespace PushNotify.Core.Tests.Services
@@ -24,6 +22,50 @@ namespace PushNotify.Core.Tests.Services
             var api = new PushoverApi(GetType().GetTypeInfo().Assembly.GetName(), () => filter);
 
             return (api, filter);
+        }
+
+        [TestMethod]
+        public void FetchMessagesSuccessful()
+        {
+            const string SECRET = "the-secret";
+            const string DEVICE_ID = "the-id";
+
+            var (service, filter) = _CreateApi();
+
+            var response = new HttpResponseMessage(HttpStatusCode.Ok)
+            {
+                Content = new HttpStringContent(@"{""status"":1,
+""request"":""36fddffb-9f62-444b-bd17-5e7c7febb258"",
+""messages"":[
+{""id"":1,""message"":""message 1"",""app"":""Pushover"",""aid"":1,""icon"":""HopmnR5uQ4cmXen"",""date"":1409605784,""priority"":0,""acked"":0,""umid"":1,""title"":""title 1""},
+{""id"":2,""message"":""message 2"",""app"":""Another"",""aid"":1,""icon"":""default"",""date"":1409605795,""priority"":2,""acked"":0,""umid"":2,""title"":""""}
+]}")
+            };
+            // the order of query parameters doesn't matter, so supply the response for either
+            filter.Responses[new Uri($"https://api.pushover.net/1/messages.json?device_id={DEVICE_ID}&secret={SECRET}")]
+                = response;
+            filter.Responses[new Uri($"https://api.pushover.net/1/messages.json?secret={SECRET}&device_id={DEVICE_ID}")]
+                = response;
+
+            var messages = service.FetchMessages(DEVICE_ID, SECRET).Result;
+
+            messages.Should().HaveCount(2);
+
+            var target = messages.Single(msg => msg.Id == 1);
+            target.Message.Should().Be("message 1");
+            target.SendingApp.Should().Be("Pushover");
+            target.Icon.Should().Be("HopmnR5uQ4cmXen");
+            target.Date.Should().Be(new DateTimeOffset(2014, 9, 1, 21, 9, 44, 0, TimeSpan.Zero));
+            target.Priority.Should().Be(PushoverMessagePriority.Normal);
+            target.Title.Should().Be("title 1");
+
+            target = messages.Single(msg => msg.Id == 2);
+            target.Message.Should().Be("message 2");
+            target.SendingApp.Should().Be("Another");
+            target.Icon.Should().Be("default");
+            target.Date.Should().Be(new DateTimeOffset(2014, 9, 1, 21, 9, 55, 0, TimeSpan.Zero));
+            target.Priority.Should().Be(PushoverMessagePriority.Emergency);
+            target.Title.Should().BeEmpty();
         }
 
         [TestMethod]
@@ -111,10 +153,7 @@ namespace PushNotify.Core.Tests.Services
 
             result.Match(
                 id => Assert.Fail($"Unexpected successful id: {id}"),
-                err =>
-                {
-                    err.DeviceNameErrors.Should().HaveCount(1);
-                });
+                err => { err.DeviceNameErrors.Should().HaveCount(1); });
         }
 
         [TestMethod]
@@ -133,10 +172,7 @@ namespace PushNotify.Core.Tests.Services
 
             result.Match(
                 id => Assert.Fail($"Unexpected successful id: {id}"),
-                err =>
-                {
-                    err.DeviceNameErrors.Should().HaveCount(1);
-                });
+                err => { err.DeviceNameErrors.Should().HaveCount(1); });
         }
 
         [TestMethod]

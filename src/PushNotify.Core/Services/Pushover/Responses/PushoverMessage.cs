@@ -8,6 +8,9 @@ namespace PushNotify.Core.Services.Pushover.Responses
     {
         DateTimeOffset IPushoverMessage.Date => DateTimeOffset.FromUnixTimeSeconds(UnixTimestamp);
 
+        [DataMember(Name = "icon")]
+        public string Icon { get; set; }
+
         [DataMember(Name = "id")]
         public int Id { get; set; }
 

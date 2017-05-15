@@ -1,5 +1,4 @@
 ﻿using System;
-
 using PushNotify.Core.Services.Pushover.Responses;
 
 namespace PushNotify.Core.Services.Pushover
@@ -7,6 +6,8 @@ namespace PushNotify.Core.Services.Pushover
     public interface IPushoverMessage
     {
         DateTimeOffset Date { get; }
+
+        string Icon { get; }
 
         int Id { get; }
 
