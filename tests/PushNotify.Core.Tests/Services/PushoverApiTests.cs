@@ -30,7 +30,12 @@ namespace PushNotify.Core.Tests.Services
         {
             var (service, filter) = _CreateApi();
 
-            filter.Responses[mLoginUri] = new HttpResponseMessage(HttpStatusCode.BadRequest);
+            filter.Responses[mLoginUri] = new HttpResponseMessage(HttpStatusCode.BadRequest)
+            {
+                Content = new HttpStringContent(@"{
+                    ""status"":0
+                }")
+            };
 
             var result = service.Login("email@example.com", "pass").Result;
 

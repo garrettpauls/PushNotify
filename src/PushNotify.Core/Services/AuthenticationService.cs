@@ -49,9 +49,10 @@ namespace PushNotify.Core.Services
                 });
             }
 
-            async Task<Either<RegisterDeviceErrors, PushoverAuth>> Error()
+            Task<Either<RegisterDeviceErrors, PushoverAuth>> Error()
             {
-                return new RegisterDeviceErrors(true);
+                var error = Prelude.Left<RegisterDeviceErrors, PushoverAuth>(new RegisterDeviceErrors(true));
+                return Task.FromResult(error);
             }
         }
     }
