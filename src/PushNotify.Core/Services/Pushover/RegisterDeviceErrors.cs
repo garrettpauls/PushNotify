@@ -2,11 +2,20 @@ namespace PushNotify.Core.Services.Pushover
 {
     public sealed class RegisterDeviceErrors
     {
-        public RegisterDeviceErrors(string[] nameErrors)
+        public RegisterDeviceErrors(bool invalidLogin)
         {
-            NameErrors = nameErrors ?? new string[0];
+            InvalidLogin = invalidLogin;
+            DeviceNameErrors = new string[0];
         }
 
-        public string[] NameErrors { get; }
+        public RegisterDeviceErrors(string[] nameErrors)
+        {
+            InvalidLogin = false;
+            DeviceNameErrors = nameErrors ?? new string[0];
+        }
+
+        public string[] DeviceNameErrors { get; }
+
+        public bool InvalidLogin { get; }
     }
 }

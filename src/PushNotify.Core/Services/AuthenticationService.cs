@@ -11,7 +11,7 @@ namespace PushNotify.Core.Services
     {
         bool TryGetCachedAuth(out PushoverAuth auth);
 
-        Task<Option<PushoverAuth>> TryLogin(string email, string password, string deviceName);
+        Task<Either<RegisterDeviceErrors, PushoverAuth>> TryLogin(string email, string password, string deviceName);
     }
 
     public sealed class AuthenticationService : IAuthenticationService
@@ -31,24 +31,27 @@ namespace PushNotify.Core.Services
             return mConfig.TryGetAuthentication(out auth);
         }
 
-        public async Task<Option<PushoverAuth>> TryLogin(string email, string password, string deviceName)
+        public async Task<Either<RegisterDeviceErrors, PushoverAuth>> TryLogin(string email, string password, string deviceName)
         {
             var maybeSecret = await mPushover.Login(email, password);
-            return await maybeSecret.Match(
-                RegisterDevice,
-                () => Task.FromResult(Option<PushoverAuth>.None));
 
-            async Task<Option<PushoverAuth>> RegisterDevice(string secret)
+            return await maybeSecret.Match(RegisterDevice, Error);
+
+            async Task<Either<RegisterDeviceErrors, PushoverAuth>> RegisterDevice(string secret)
             {
                 var result = await mPushover.RegisterDevice(secret, deviceName);
 
-                return result.ToOption().Map(deviceId =>
+                return result.Map(deviceId =>
                 {
                     var auth = new PushoverAuth(deviceId, secret);
                     mConfig.SetAuthentication(auth);
-
                     return auth;
                 });
+            }
+
+            async Task<Either<RegisterDeviceErrors, PushoverAuth>> Error()
+            {
+                return new RegisterDeviceErrors(true);
             }
         }
     }

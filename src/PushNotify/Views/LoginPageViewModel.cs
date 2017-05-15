@@ -2,6 +2,7 @@
 
 using PushNotify.Core.Models;
 using PushNotify.Core.Services;
+using PushNotify.Core.Services.Pushover;
 using PushNotify.Models;
 
 using Template10.Mvvm;
@@ -29,10 +30,21 @@ namespace PushNotify.Views
 
         public DelegateCommand LoginCommand { get; }
 
-        private Task _LoginFailed()
+        private Task _LoginFailed(RegisterDeviceErrors errors)
         {
-            Credentials.AddError(nameof(LoginCredentials.Email), "Login failed");
-            Credentials.AddError(nameof(LoginCredentials.Password), "Login failed");
+            if(errors.InvalidLogin)
+            {
+                Credentials.AddError(nameof(LoginCredentials.Email), "Login failed");
+                Credentials.AddError(nameof(LoginCredentials.Password), "Login failed");
+            }
+            else
+            {
+                foreach(var error in errors.DeviceNameErrors)
+                {
+                    Credentials.AddError(nameof(LoginCredentials.DeviceName), error);
+                }
+            }
+
             return Task.CompletedTask;
         }
 
