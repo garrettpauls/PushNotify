@@ -89,7 +89,12 @@ namespace PushNotify.Core.Services.Pushover
 
                 if(!json.IsSuccessful)
                 {
-                    return new RegisterDeviceErrors(json.Errors["name"]);
+                    if(json.Errors == null || !json.Errors.TryGetValue("name", out string[] nameErrors))
+                    {
+                        nameErrors = new[] {"Unknown error registering device."};
+                    }
+
+                    return new RegisterDeviceErrors(nameErrors);
                 }
 
                 return json.Id;
