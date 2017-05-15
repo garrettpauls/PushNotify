@@ -115,13 +115,18 @@
     <Compile Include="Services\AuthenticationService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\ConfigService.cs" />
+    <Compile Include="Services\Pushover\IPushoverMessage.cs" />
     <Compile Include="Services\Pushover\PushoverApi.cs" />
     <Compile Include="Services\Pushover\RegisterDeviceErrors.cs" />
     <Compile Include="Services\Pushover\Responses\Json.cs" />
     <Compile Include="Services\Pushover\Responses\LoginResponse.cs" />
+    <Compile Include="Services\Pushover\Responses\MessageListResponse.cs" />
+    <Compile Include="Services\Pushover\Responses\PushoverMessage.cs" />
+    <Compile Include="Services\Pushover\Responses\PushoverMessagePriority.cs" />
     <Compile Include="Services\Pushover\Responses\PushoverResponse.cs" />
     <Compile Include="Services\Pushover\Responses\RegisterDeviceResponse.cs" />
     <Compile Include="Services\ServicesModule.cs" />
+    <Compile Include="Web\UriQueryBuilder.cs" />
     <EmbeddedResource Include="Properties\PushNotify.Core.rd.xml" />
   </ItemGroup>
   <ItemGroup>
