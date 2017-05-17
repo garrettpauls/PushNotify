@@ -10,6 +10,7 @@ using LanguageExt;
 using PushNotify.Core.Models;
 using PushNotify.Core.Services;
 using PushNotify.Core.Services.Pushover;
+using PushNotify.Core.Services.Pushover.Responses;
 
 using Template10.Mvvm;
 
@@ -42,15 +43,13 @@ namespace PushNotify.Views
 
         private async Task _Refresh()
         {
-            if(mConfigService.TryGetAuthentication(out PushoverAuth auth))
-            {
-                var messages = await mPushover.FetchMessages(auth.DeviceId, auth.Secret);
+            await mMessageService.FetchNewMessages();
+            var messages = await mMessageService.GetCachedMessages();
 
-                Messages.Clear();
-                foreach(var message in messages.OrderByDescending(msg => msg.Date))
-                {
-                    Messages.Add(new MessageViewModel(message));
-                }
+            Messages.Clear();
+            foreach(var message in messages.OrderByDescending(msg => msg.Date))
+            {
+                Messages.Add(new MessageViewModel(message));
             }
         }
 
@@ -62,11 +61,11 @@ namespace PushNotify.Views
 
     public sealed class MessageViewModel : ViewModelBase
     {
-        public MessageViewModel(IPushoverMessage message)
+        public MessageViewModel(PushoverMessage message)
         {
             Message = message;
         }
 
-        public IPushoverMessage Message { get; }
+        public PushoverMessage Message { get; }
     }
 }

@@ -2,6 +2,8 @@ namespace PushNotify.Core.Services.Pushover
 {
     public sealed class RegisterDeviceErrors
     {
+        public static readonly RegisterDeviceErrors Unknown = new RegisterDeviceErrors(new[] {"Unknown error registering device."});
+
         public RegisterDeviceErrors(bool invalidLogin)
         {
             InvalidLogin = invalidLogin;

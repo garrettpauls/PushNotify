@@ -4,9 +4,10 @@ using System.Runtime.Serialization;
 namespace PushNotify.Core.Services.Pushover.Responses
 {
     [DataContract]
-    public sealed class PushoverMessage : IPushoverMessage
+    public sealed class PushoverMessage
     {
-        DateTimeOffset IPushoverMessage.Date => DateTimeOffset.FromUnixTimeSeconds(UnixTimestamp);
+        [IgnoreDataMember]
+        public DateTimeOffset Date => DateTimeOffset.FromUnixTimeSeconds(UnixTimestamp);
 
         [DataMember(Name = "icon")]
         public string Icon { get; set; }
@@ -14,10 +15,11 @@ namespace PushNotify.Core.Services.Pushover.Responses
         [DataMember(Name = "id")]
         public int Id { get; set; }
 
-        bool IPushoverMessage.IsHtml => IsHtml == 1;
+        [IgnoreDataMember]
+        public bool IsHtml => IsHtmlInt == 1;
 
         [DataMember(Name = "html")]
-        public int IsHtml { get; set; }
+        public int IsHtmlInt { get; set; }
 
         [DataMember(Name = "message")]
         public string Message { get; set; }

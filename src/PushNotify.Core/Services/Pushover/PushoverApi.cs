@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -10,6 +9,7 @@ using Windows.Web.Http.Filters;
 
 using LanguageExt;
 
+using PushNotify.Core.Models;
 using PushNotify.Core.Services.Pushover.Responses;
 using PushNotify.Core.Web;
 
@@ -17,13 +17,13 @@ namespace PushNotify.Core.Services.Pushover
 {
     public interface IPushoverApi
     {
-        Task<IPushoverMessage[]> FetchMessages(string deviceId, string secret);
+        Task<PushoverMessage[]> FetchMessages(string deviceId, string secret);
 
         Task<Option<string>> Login(string email, string password);
 
         Task<Either<RegisterDeviceErrors, string>> RegisterDevice(string secret, string deviceId);
 
-        Task<bool> UpdateHighestMessage(string deviceId, int messageId);
+        Task<bool> UpdateHighestMessage(PushoverAuth auth, int messageId);
     }
 
     public sealed class PushoverApi : IPushoverApi
@@ -46,7 +46,7 @@ namespace PushNotify.Core.Services.Pushover
             return client;
         }
 
-        public async Task<IPushoverMessage[]> FetchMessages(string deviceId, string secret)
+        public async Task<PushoverMessage[]> FetchMessages(string deviceId, string secret)
         {
             using(var client = _CreateClient())
             {
@@ -60,18 +60,15 @@ namespace PushNotify.Core.Services.Pushover
                 if(!response.IsSuccessStatusCode)
                 {
                     // TODO: better error reporting
-                    return new IPushoverMessage[0];
+                    return new PushoverMessage[0];
                 }
 
                 var content = await response.Content.ReadAsStringAsync();
                 var result = Json.Read<MessageListResponse>(content);
 
-                if(!result.IsSuccessful)
-                {
-                    return new IPushoverMessage[0];
-                }
-
-                return result.Messages.Cast<IPushoverMessage>().ToArray();
+                return result.Match(
+                    success => success.IsSuccessful ? success.Messages : new PushoverMessage[0],
+                    () => new PushoverMessage[0]);
             }
         }
 
@@ -94,12 +91,9 @@ namespace PushNotify.Core.Services.Pushover
                 var content = await response.Content.ReadAsStringAsync();
                 var result = Json.Read<LoginResponse>(content);
 
-                if(!result.IsSuccessful)
-                {
-                    return null;
-                }
-
-                return result.Secret;
+                return result.Match(
+                    success => success.IsSuccessful ? success.Secret : null,
+                    () => null);
             }
         }
 
@@ -120,38 +114,46 @@ namespace PushNotify.Core.Services.Pushover
                 var json = Json.Read<RegisterDeviceResponse>(content);
                 if(json == null)
                 {
-                    return new RegisterDeviceErrors(new[] {"Unknown error registering device."});
+                    return RegisterDeviceErrors.Unknown;
                 }
 
-                if(!json.IsSuccessful)
+                return json.Match(GetResult, () => RegisterDeviceErrors.Unknown);
+
+                Either<RegisterDeviceErrors, string> GetResult(RegisterDeviceResponse result)
                 {
-                    if(json.Errors == null || !json.Errors.TryGetValue("name", out string[] nameErrors))
+                    if(!result.IsSuccessful)
                     {
-                        nameErrors = new[] {"Unknown error registering device."};
+                        if(result.Errors == null || !result.Errors.TryGetValue("name", out string[] nameErrors))
+                        {
+                            nameErrors = new[] {"Unknown error registering device."};
+                        }
+
+                        return new RegisterDeviceErrors(nameErrors);
                     }
 
-                    return new RegisterDeviceErrors(nameErrors);
+                    return result.Id;
                 }
-
-                return json.Id;
             }
         }
 
-        public async Task<bool> UpdateHighestMessage(string deviceId, int messageId)
+        public async Task<bool> UpdateHighestMessage(PushoverAuth auth, int messageId)
         {
             using(var client = _CreateClient())
             {
                 var payload = new HttpFormUrlEncodedContent(new Dictionary<string, string>
                 {
-                    ["update_highest_message"] = messageId.ToString(CultureInfo.InvariantCulture)
+                    ["secret"] = auth.Secret,
+                    ["message"] = messageId.ToString(CultureInfo.InvariantCulture)
                 });
 
-                var response = await client.PostAsync(new Uri($"https://api.pushover.net/1/devices/{deviceId}/update_highest_message.json"), payload);
+                var response = await client.PostAsync(new Uri($"https://api.pushover.net/1/devices/{auth.DeviceId}/update_highest_message.json"), payload);
                 var content = await response.Content.ReadAsStringAsync();
 
                 var json = Json.Read<PushoverResponse>(content);
 
-                return json?.IsSuccessful ?? false;
+                return json.Match(
+                    success => success.IsSuccessful,
+                    () => false);
             }
         }
     }
