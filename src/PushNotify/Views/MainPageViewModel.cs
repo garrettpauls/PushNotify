@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 
 using Windows.UI.Xaml.Navigation;
@@ -17,30 +18,20 @@ namespace PushNotify.Views
     public sealed class MainPageViewModel : ViewModelBase
     {
         private readonly IConfigService mConfigService;
+        private readonly IMessageService mMessageService;
         private readonly IPushoverApi mPushover;
 
-        public MainPageViewModel(IConfigService configService, IPushoverApi pushover)
+        public MainPageViewModel(IConfigService configService, IPushoverApi pushover, IMessageService messageService)
         {
             mConfigService = configService;
             mPushover = pushover;
+            mMessageService = messageService;
             LogoutCommand = new DelegateCommand(_Logout);
         }
 
         public DelegateCommand LogoutCommand { get; }
 
-        public override Task OnNavigatedToAsync(object parameter, NavigationMode mode, IDictionary<string, object> state)
-        {
-            return _Refresh();
-        }
-
-        private async Task _Refresh()
-        {
-            if(mConfigService.TryGetAuthentication(out PushoverAuth auth))
-            {
-                var messages = await mPushover.FetchMessages(auth.DeviceId, auth.Secret);
-                Debug.WriteLine(messages);
-            }
-        }
+        public ObservableCollection<MessageViewModel> Messages { get; } = new ObservableCollection<MessageViewModel>();
 
         private async void _Logout()
         {
@@ -48,5 +39,34 @@ namespace PushNotify.Views
             await NavigationService.NavigateAsync(typeof(LoginPage));
             NavigationService.ClearHistory();
         }
+
+        private async Task _Refresh()
+        {
+            if(mConfigService.TryGetAuthentication(out PushoverAuth auth))
+            {
+                var messages = await mPushover.FetchMessages(auth.DeviceId, auth.Secret);
+
+                Messages.Clear();
+                foreach(var message in messages.OrderByDescending(msg => msg.Date))
+                {
+                    Messages.Add(new MessageViewModel(message));
+                }
+            }
+        }
+
+        public override Task OnNavigatedToAsync(object parameter, NavigationMode mode, IDictionary<string, object> state)
+        {
+            return _Refresh();
+        }
+    }
+
+    public sealed class MessageViewModel : ViewModelBase
+    {
+        public MessageViewModel(IPushoverMessage message)
+        {
+            Message = message;
+        }
+
+        public IPushoverMessage Message { get; }
     }
 }

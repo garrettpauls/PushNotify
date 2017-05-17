@@ -11,6 +11,7 @@ namespace PushNotify.Core.Services
             builder.RegisterType<AuthenticationService>().As<IAuthenticationService>().SingleInstance();
             builder.RegisterType<ConfigService>().As<IConfigService>().SingleInstance();
             builder.RegisterType<PushoverApi>().As<IPushoverApi>().SingleInstance();
+            builder.RegisterType<MessageService>().As<IMessageService>().SingleInstance();
         }
     }
 }

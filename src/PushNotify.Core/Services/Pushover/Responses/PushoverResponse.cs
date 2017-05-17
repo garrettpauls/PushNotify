@@ -3,7 +3,7 @@
 namespace PushNotify.Core.Services.Pushover.Responses
 {
     [DataContract]
-    public abstract class PushoverResponse
+    public class PushoverResponse
     {
         [IgnoreDataMember]
         public bool IsSuccessful => Status == 1;

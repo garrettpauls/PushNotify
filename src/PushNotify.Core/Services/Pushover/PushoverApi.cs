@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -21,6 +22,8 @@ namespace PushNotify.Core.Services.Pushover
         Task<Option<string>> Login(string email, string password);
 
         Task<Either<RegisterDeviceErrors, string>> RegisterDevice(string secret, string deviceId);
+
+        Task<bool> UpdateHighestMessage(string deviceId, int messageId);
     }
 
     public sealed class PushoverApi : IPushoverApi
@@ -131,6 +134,24 @@ namespace PushNotify.Core.Services.Pushover
                 }
 
                 return json.Id;
+            }
+        }
+
+        public async Task<bool> UpdateHighestMessage(string deviceId, int messageId)
+        {
+            using(var client = _CreateClient())
+            {
+                var payload = new HttpFormUrlEncodedContent(new Dictionary<string, string>
+                {
+                    ["update_highest_message"] = messageId.ToString(CultureInfo.InvariantCulture)
+                });
+
+                var response = await client.PostAsync(new Uri($"https://api.pushover.net/1/devices/{deviceId}/update_highest_message.json"), payload);
+                var content = await response.Content.ReadAsStringAsync();
+
+                var json = Json.Read<PushoverResponse>(content);
+
+                return json?.IsSuccessful ?? false;
             }
         }
     }

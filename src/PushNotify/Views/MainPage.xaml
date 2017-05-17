@@ -9,10 +9,37 @@
   mc:Ignorable="d">
 
   <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-    <c:PageHeader Text="Notifications">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+    <c:PageHeader Grid.Row="0" Text="Notifications">
       <c:PageHeader.SecondaryCommands>
         <AppBarButton Label="Logout" Command="{x:Bind ViewModel.LogoutCommand}" />
       </c:PageHeader.SecondaryCommands>
     </c:PageHeader>
+    <ListView Grid.Row="1" SelectionMode="None" ItemsSource="{x:Bind ViewModel.Messages}">
+      <ListView.ItemContainerStyle>
+        <Style TargetType="ListViewItem">
+          <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        </Style>
+      </ListView.ItemContainerStyle>
+      <ListView.ItemTemplate>
+        <DataTemplate x:DataType="local:MessageViewModel">
+          <Border BorderThickness="1" BorderBrush="{ThemeResource ListViewItemFocusBorderThemeBrush}" Margin="4 4 4 0"
+                  HorizontalAlignment="Stretch" Padding="4">
+            <RelativePanel>
+              <TextBlock x:Name="Title" Text="{x:Bind Message.Title}" TextTrimming="CharacterEllipsis" FontWeight="Bold"
+                         RelativePanel.AlignTopWithPanel="True" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" />
+              <Border x:Name="TitleUnderline" BorderThickness="0 1 0 0" BorderBrush="{ThemeResource SystemControlForegroundAccentBrush}"
+                      RelativePanel.Below="Title" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWith="Title"
+                      Margin="0 0 16 8" />
+              <TextBlock x:Name="Message" Text="{x:Bind Message.Message}" TextWrapping="Wrap"
+                         RelativePanel.Below="TitleUnderline" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" />
+            </RelativePanel>
+          </Border>
+        </DataTemplate>
+      </ListView.ItemTemplate>
+    </ListView>
   </Grid>
 </local:MainPageImpl>
