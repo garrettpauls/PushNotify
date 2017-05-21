@@ -75,6 +75,8 @@ namespace PushNotify
             _InitializeLogging();
             _InitializeDebug();
 
+            mContainer.Resolve<INotificationService>().Initialize();
+
             return base.OnInitializeAsync(args);
         }
 

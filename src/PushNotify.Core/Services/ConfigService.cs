@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
+using System.Reactive.Subjects;
 
 using Windows.Foundation.Collections;
 using Windows.Security.Credentials;
@@ -12,6 +14,8 @@ namespace PushNotify.Core.Services
 {
     public interface IConfigService
     {
+        IObservable<Option<PushoverAuth>> Authentication { get; }
+
         void SetAuthentication(Option<PushoverAuth> auth);
 
         bool TryGetAuthentication(out PushoverAuth auth);
@@ -21,6 +25,7 @@ namespace PushNotify.Core.Services
     {
         private const string SETTING_DEVICE_ID = "DeviceId";
         private const string VAULT_RESOURCE = "Push Notify";
+        private readonly BehaviorSubject<Option<PushoverAuth>> mAuthentication = new BehaviorSubject<Option<PushoverAuth>>(Option<PushoverAuth>.None);
         private readonly IPropertySet mSettings;
         private readonly PasswordVault mVault;
 
@@ -28,6 +33,16 @@ namespace PushNotify.Core.Services
         {
             mVault = new PasswordVault();
             mSettings = ApplicationData.Current.LocalSettings.Values;
+        }
+
+        public IObservable<Option<PushoverAuth>> Authentication => mAuthentication;
+
+        public void Initialize()
+        {
+            if(TryGetAuthentication(out PushoverAuth auth))
+            {
+                mAuthentication.OnNext(auth);
+            }
         }
 
         public void SetAuthentication(Option<PushoverAuth> auth)
@@ -47,6 +62,7 @@ namespace PushNotify.Core.Services
                         mVault.Remove(credential);
                     }
                 });
+            mAuthentication.OnNext(auth);
         }
 
         public bool TryGetAuthentication(out PushoverAuth auth)
