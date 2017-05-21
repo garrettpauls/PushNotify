@@ -131,7 +131,7 @@
       <Version>4.19.2</Version>
     </PackageReference>
     <PackageReference Include="LanguageExt.Core">
-      <Version>2.0.62</Version>
+      <Version>2.0.65</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
       <Version>5.3.3</Version>
