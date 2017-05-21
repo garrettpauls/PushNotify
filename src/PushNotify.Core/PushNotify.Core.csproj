@@ -119,7 +119,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\ConfigService.cs" />
     <Compile Include="Services\MessageService.cs" />
-    <Compile Include="Services\NotificationService.cs" />
+    <Compile Include="Services\NotificationListenerService.cs" />
     <Compile Include="Services\Pushover\PushoverApi.cs" />
     <Compile Include="Services\Pushover\RegisterDeviceErrors.cs" />
     <Compile Include="Services\Pushover\Responses\Json.cs" />
@@ -130,6 +130,7 @@
     <Compile Include="Services\Pushover\Responses\PushoverResponse.cs" />
     <Compile Include="Services\Pushover\Responses\RegisterDeviceResponse.cs" />
     <Compile Include="Services\ServicesModule.cs" />
+    <Compile Include="Services\NotificationService.cs" />
     <Compile Include="Web\UriQueryBuilder.cs" />
     <EmbeddedResource Include="Properties\PushNotify.Core.rd.xml" />
   </ItemGroup>
@@ -145,6 +146,9 @@
     </PackageReference>
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
       <Version>5.3.3</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Toolkit.Uwp.Notifications">
+      <Version>1.4.1</Version>
     </PackageReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">

@@ -10,11 +10,12 @@ namespace PushNotify.Core.Services
         {
             builder.RegisterType<AuthenticationService>().As<IAuthenticationService>().SingleInstance();
             builder.RegisterType<ConfigService>().As<IConfigService>()
-                .OnActivating(e => e.Instance.Initialize())
-                .SingleInstance();
+                   .OnActivating(e => e.Instance.Initialize())
+                   .SingleInstance();
             builder.RegisterType<PushoverApi>().As<IPushoverApi>().SingleInstance();
             builder.RegisterType<MessageService>().As<IMessageService>().SingleInstance();
-            builder.RegisterType<NotificationListenerListenerService>().As<INotificationListenerService>().SingleInstance();
+            builder.RegisterType<NotificationListenerService>().As<INotificationListenerService>().SingleInstance();
+            builder.RegisterType<NotificationService>().As<INotificationService>().SingleInstance();
         }
     }
 }

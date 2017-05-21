@@ -24,12 +24,15 @@ namespace PushNotify.Core.Services
         private readonly IConfigService mConfig;
         private readonly CompositeDisposable mDisposables = new CompositeDisposable();
         private readonly ILogger mLog;
-
+        private readonly IMessageService mMessageService;
+        private readonly INotificationService mNotifier;
         private Option<MessageWebSocket> mSocket = Option<MessageWebSocket>.None;
 
-        public NotificationListenerService(IConfigService config, ILogger log)
+        public NotificationListenerService(IConfigService config, INotificationService notifier, IMessageService messageService, ILogger log)
         {
             mConfig = config;
+            mNotifier = notifier;
+            mMessageService = messageService;
             mLog = log;
             mConfig.Authentication.Subscribe(_HandleAuthChanged).AddTo(mDisposables);
         }
@@ -124,7 +127,7 @@ namespace PushNotify.Core.Services
                     switch(msg)
                     {
                         case NEW_MESSAGE:
-                            mLog.Trace("New message received");
+                            await _RetrieveNewMessages();
                             break;
                         case KEEP_ALIVE:
                             mLog.Trace("Keep alive request");
@@ -167,6 +170,15 @@ namespace PushNotify.Core.Services
             if(mConfig.TryGetAuthentication(out PushoverAuth auth))
             {
                 mSocket = await _Enable(auth);
+            }
+        }
+
+        private async Task _RetrieveNewMessages()
+        {
+            var messages = await mMessageService.FetchNewMessages();
+            foreach(var message in messages)
+            {
+                mNotifier.Show(message.Id.ToString(), message.Title, message.Message);
             }
         }
 
