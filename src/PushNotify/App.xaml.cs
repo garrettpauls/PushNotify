@@ -5,11 +5,13 @@ using System.Reflection;
 using System.Threading.Tasks;
 
 using Windows.ApplicationModel.Activation;
-using Windows.Foundation.Diagnostics;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
 using Autofac;
+
+using MetroLog;
+using MetroLog.Targets;
 
 using PushNotify.Core.Logging;
 using PushNotify.Core.Services;
@@ -24,11 +26,17 @@ namespace PushNotify
     public sealed partial class App : BootStrapper
     {
         private IContainer mContainer;
-        private ILoggingChannel mLogger;
+        private ILogger mLogger;
 
         public App()
         {
             UnhandledException += _HandleException;
+
+#if DEBUG
+            LogManagerFactory.DefaultConfiguration.AddTarget(LogLevel.Trace, LogLevel.Fatal, new DebugTarget());
+#endif
+
+            GlobalCrashHandler.Configure();
         }
 
         private IContainer _BuildContainer()
@@ -45,23 +53,26 @@ namespace PushNotify
 
         private void _HandleException(object sender, UnhandledExceptionEventArgs e)
         {
-            mLogger?.LogMessage(e.Message, LoggingLevel.Error);
-            mLogger?.LogMessage(e.ToString(), LoggingLevel.Error);
+            mLogger?.Log(LogLevel.Error, e.Message);
+            mLogger?.Log(LogLevel.Error, e.ToString());
+        }
 
-#if DEBUG
-            Debug.WriteLine(e.Message);
-            Debug.WriteLine(e.Exception);
-#endif
+        [Conditional("DEBUG")]
+        private void _InitializeDebug()
+        {
+            DebugSettings.IsBindingTracingEnabled = true;
+        }
+
+        private void _InitializeLogging()
+        {
+            mLogger = mContainer.Resolve<ILogger>(new TypedParameter(typeof(Type), typeof(App)));
         }
 
         public override Task OnInitializeAsync(IActivatedEventArgs args)
         {
-#if DEBUG
-            DebugSettings.IsBindingTracingEnabled = true;
-#endif
-
             mContainer = _BuildContainer();
-            mLogger = mContainer.Resolve<ILoggingChannel>(new TypedParameter(typeof(Type), typeof(App)));
+            _InitializeLogging();
+            _InitializeDebug();
 
             return base.OnInitializeAsync(args);
         }
@@ -90,12 +101,12 @@ namespace PushNotify
             {
                 var vmType = hasViewModel.GenericTypeArguments[0];
 
-                mLogger.LogMessage($"ResolveForPage: {page.GetType().FullName}->{vmType.FullName}");
+                mLogger.Log(LogLevel.Trace, $"ResolveForPage: {page.GetType().FullName}->{vmType.FullName}");
 
                 return (INavigable) mContainer.Resolve(vmType);
             }
 
-            mLogger.LogMessage($"ResolveForPage: {page.GetType().FullName}->No ViewModel");
+            mLogger.Log(LogLevel.Trace, $"ResolveForPage: {page.GetType().FullName}->No ViewModel");
             return null;
         }
     }

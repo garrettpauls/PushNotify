@@ -2,24 +2,25 @@
 using System.Collections.Generic;
 using System.Linq;
 
-using Windows.Foundation.Diagnostics;
-
 using Autofac;
 using Autofac.Core;
+
+using MetroLog;
 
 namespace PushNotify.Core.Logging
 {
     public sealed class LoggingModule : Module
     {
-        private readonly ILoggingSession mLoggingSession = new LoggingSession("Default");
-        private readonly ILoggingChannel mResolveTypeLogger;
+        private readonly ILogManager mLoggingSession;
+        private readonly ILogger mResolveTypeLogger;
 
         public LoggingModule()
         {
+            mLoggingSession = LogManagerFactory.DefaultLogManager;
             mResolveTypeLogger = _ResolveLogger(typeof(LoggingModule), mLoggingSession);
         }
 
-        private ILoggingChannel _BuildLogger(IComponentContext ctx, IEnumerable<Parameter> p)
+        private ILogger _BuildLogger(IComponentContext ctx, IEnumerable<Parameter> p)
         {
             var parameters = p.ToArr();
 
@@ -36,25 +37,22 @@ namespace PushNotify.Core.Logging
                     .FirstOrDefault()
                 ?? "Unknown";
 
-            return _ResolveLogger(loggerName, ctx.Resolve<ILoggingSession[]>());
+            return _ResolveLogger(loggerName, ctx.Resolve<ILogManager>());
         }
 
         private void _HandleRegistrationPreparing(object sender, PreparingEventArgs e)
         {
             var limitType = e.Component.Activator.LimitType;
 
-            if(mResolveTypeLogger.Enabled)
-            {
-                mResolveTypeLogger.LogMessage($"Resolving concrete type {limitType}", LoggingLevel.Verbose);
-            }
+            mResolveTypeLogger.Log(LogLevel.Trace, $"Resolving concrete type {limitType}");
 
             e.Parameters = e
                 .Parameters
                 .Union(new[]
                 {
                     new ResolvedParameter(
-                        (p, ctx) => p.ParameterType == typeof(ILoggingChannel),
-                        (p, ctx) => _ResolveLogger(limitType, ctx.Resolve<ILoggingSession[]>()))
+                        (p, ctx) => p.ParameterType == typeof(ILogger),
+                        (p, ctx) => _ResolveLogger(limitType, ctx.Resolve<ILogManager>()))
                 });
         }
 
@@ -65,25 +63,18 @@ namespace PushNotify.Core.Logging
 
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterInstance(mLoggingSession).As<ILoggingSession>().SingleInstance();
-            builder.Register(_BuildLogger).As<ILoggingChannel>().InstancePerDependency();
+            builder.RegisterInstance(mLoggingSession).As<ILogManager>().SingleInstance();
+            builder.Register(_BuildLogger).As<ILogger>().InstancePerDependency();
         }
 
-        private static ILoggingChannel _ResolveLogger(Type type, params ILoggingSession[] sessions)
+        private static ILogger _ResolveLogger(Type type, ILogManager manager)
         {
-            return _ResolveLogger(type.FullName, sessions);
+            return _ResolveLogger(type.FullName, manager);
         }
 
-        private static ILoggingChannel _ResolveLogger(string name, params ILoggingSession[] sessions)
+        private static ILogger _ResolveLogger(string name, ILogManager manager)
         {
-            var channel = new LoggingChannel(name, new LoggingChannelOptions());
-
-            foreach(var session in sessions)
-            {
-                session.AddLoggingChannel(channel);
-            }
-
-            return channel;
+            return manager.GetLogger(name);
         }
     }
 }
