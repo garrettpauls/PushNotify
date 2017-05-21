@@ -14,7 +14,7 @@ namespace PushNotify.Core.Services
                 .SingleInstance();
             builder.RegisterType<PushoverApi>().As<IPushoverApi>().SingleInstance();
             builder.RegisterType<MessageService>().As<IMessageService>().SingleInstance();
-            builder.RegisterType<NotificationService>().As<INotificationService>().SingleInstance();
+            builder.RegisterType<NotificationListenerListenerService>().As<INotificationListenerService>().SingleInstance();
         }
     }
 }

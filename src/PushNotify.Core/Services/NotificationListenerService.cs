@@ -14,12 +14,12 @@ using PushNotify.Core.Models;
 
 namespace PushNotify.Core.Services
 {
-    public interface INotificationService
+    public interface INotificationListenerService
     {
         Task Initialize();
     }
 
-    public sealed class NotificationService : INotificationService, IDisposable
+    public sealed class NotificationListenerService : INotificationListenerService, IDisposable
     {
         private readonly IConfigService mConfig;
         private readonly CompositeDisposable mDisposables = new CompositeDisposable();
@@ -27,7 +27,7 @@ namespace PushNotify.Core.Services
 
         private Option<MessageWebSocket> mSocket = Option<MessageWebSocket>.None;
 
-        public NotificationService(IConfigService config, ILogger log)
+        public NotificationListenerService(IConfigService config, ILogger log)
         {
             mConfig = config;
             mLog = log;
