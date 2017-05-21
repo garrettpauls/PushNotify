@@ -33,7 +33,8 @@ namespace PushNotify
             UnhandledException += _HandleException;
 
 #if DEBUG
-            LogManagerFactory.DefaultConfiguration.AddTarget(LogLevel.Trace, LogLevel.Fatal, new DebugTarget());
+            LogManagerFactory.DefaultConfiguration.AddTarget(
+                LogLevel.Trace, LogLevel.Fatal, new DebugTarget(new DebugLineLayout()));
 #endif
 
             GlobalCrashHandler.Configure();
