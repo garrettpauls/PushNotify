@@ -34,15 +34,25 @@ namespace PushNotify.Core.Services
             mConfig.Authentication.Subscribe(_HandleAuthChanged).AddTo(mDisposables);
         }
 
-        private Task<MessageWebSocket> _Disable(MessageWebSocket socket)
+        private void _Disable(MessageWebSocket socket)
         {
+            if(socket == null)
+            {
+                return;
+            }
+
             mLog.Trace("Closing existing web socket.");
 
             socket.MessageReceived -= _HandleMessageReceived;
             socket.Close(0, "");
             socket.Dispose();
+        }
 
-            return null;
+        private Task<MessageWebSocket> _DisableAsync(MessageWebSocket socket)
+        {
+            _Disable(socket);
+
+            return Task.FromResult((MessageWebSocket) null);
         }
 
         private async Task<MessageWebSocket> _Enable(PushoverAuth auth)
@@ -89,7 +99,7 @@ namespace PushNotify.Core.Services
                 },
                 async () =>
                 {
-                    return await mSocket.MatchAsync(_Disable, () => Task.FromResult((MessageWebSocket) null));
+                    return await mSocket.MatchAsync(_DisableAsync, () => Task.FromResult((MessageWebSocket) null));
                 });
 
             mSocket = result;
@@ -153,18 +163,18 @@ namespace PushNotify.Core.Services
         {
             mLog.Info("Reloading connection");
 
-            await mSocket.IfSomeAsync(new Func<MessageWebSocket, Task>(_Disable));
+            mSocket.IfSome(new Action<MessageWebSocket>(_Disable));
             if(mConfig.TryGetAuthentication(out PushoverAuth auth))
             {
                 mSocket = await _Enable(auth);
             }
         }
 
-        public async void Dispose()
+        public void Dispose()
         {
             mDisposables?.Dispose();
 
-            await mSocket.IfSomeAsync(new Func<MessageWebSocket, Task>(_Disable));
+            mSocket.IfSome(new Action<MessageWebSocket>(_Disable));
         }
 
         public Task Initialize()
