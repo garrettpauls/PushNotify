@@ -111,6 +111,7 @@
     <Compile Include="..\PushNotifyAssemblyInfo.cs">
       <Link>Properties\PushNotifyAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Logging\LoggingModule.cs" />
     <Compile Include="Models\PushoverAuth.cs" />
     <Compile Include="Services\AuthenticationService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

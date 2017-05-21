@@ -1,14 +1,17 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
 using Windows.ApplicationModel.Activation;
+using Windows.Foundation.Diagnostics;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
 using Autofac;
 
+using PushNotify.Core.Logging;
 using PushNotify.Core.Services;
 using PushNotify.Framework.Xaml;
 using PushNotify.Views;
@@ -21,6 +24,7 @@ namespace PushNotify
     public sealed partial class App : BootStrapper
     {
         private IContainer mContainer;
+        private ILoggingChannel mLogger;
 
         public App()
         {
@@ -31,6 +35,7 @@ namespace PushNotify
         {
             var builder = new ContainerBuilder();
 
+            builder.RegisterModule<LoggingModule>();
             builder.RegisterModule<ViewsModule>();
             builder.RegisterModule<ServicesModule>();
             builder.RegisterInstance(typeof(App).GetTypeInfo().Assembly.GetName()).As<AssemblyName>().SingleInstance();
@@ -40,6 +45,9 @@ namespace PushNotify
 
         private void _HandleException(object sender, UnhandledExceptionEventArgs e)
         {
+            mLogger?.LogMessage(e.Message, LoggingLevel.Error);
+            mLogger?.LogMessage(e.ToString(), LoggingLevel.Error);
+
 #if DEBUG
             Debug.WriteLine(e.Message);
             Debug.WriteLine(e.Exception);
@@ -53,6 +61,7 @@ namespace PushNotify
 #endif
 
             mContainer = _BuildContainer();
+            mLogger = mContainer.Resolve<ILoggingChannel>(new TypedParameter(typeof(Type), typeof(App)));
 
             return base.OnInitializeAsync(args);
         }
@@ -80,9 +89,13 @@ namespace PushNotify
             if(hasViewModel != null)
             {
                 var vmType = hasViewModel.GenericTypeArguments[0];
+
+                mLogger.LogMessage($"ResolveForPage: {page.GetType().FullName}->{vmType.FullName}");
+
                 return (INavigable) mContainer.Resolve(vmType);
             }
 
+            mLogger.LogMessage($"ResolveForPage: {page.GetType().FullName}->No ViewModel");
             return null;
         }
     }
