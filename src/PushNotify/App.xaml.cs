@@ -69,13 +69,13 @@ namespace PushNotify
             mLogger = mContainer.Resolve<ILogger>(new TypedParameter(typeof(Type), typeof(App)));
         }
 
-        public override Task OnInitializeAsync(IActivatedEventArgs args)
+        public override async Task OnInitializeAsync(IActivatedEventArgs args)
         {
             mContainer = _BuildContainer();
             _InitializeLogging();
             _InitializeDebug();
 
-            return base.OnInitializeAsync(args);
+            await mContainer.Resolve<INotificationListenerService>().Initialize();
         }
 
         public override async Task OnStartAsync(StartKind startKind, IActivatedEventArgs args)

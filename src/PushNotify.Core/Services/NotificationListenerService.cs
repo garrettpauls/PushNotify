@@ -178,7 +178,7 @@ namespace PushNotify.Core.Services
             var messages = await mMessageService.FetchNewMessages();
             foreach(var message in messages)
             {
-                mNotifier.Show(message.Id.ToString(), message.Title, message.Message);
+                mNotifier.Show(message);
             }
         }
 

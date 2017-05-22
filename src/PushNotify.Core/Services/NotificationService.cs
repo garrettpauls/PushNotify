@@ -2,7 +2,11 @@
 
 using Windows.UI.Notifications;
 
+using MetroLog;
+
 using Microsoft.Toolkit.Uwp.Notifications;
+
+using PushNotify.Core.Services.Pushover.Responses;
 
 namespace PushNotify.Core.Services
 {
@@ -10,16 +14,18 @@ namespace PushNotify.Core.Services
     {
         void Clear();
 
-        void Show(string id, string title, string message);
+        void Show(PushoverMessage message);
     }
 
     public sealed class NotificationService : INotificationService
     {
+        private readonly ILogger mLog;
         private const string NOTIFICATION_GROUP = "DefaultNotificationGroup";
         private readonly ToastNotifier mNotifier;
 
-        public NotificationService()
+        public NotificationService(ILogger log)
         {
+            mLog = log;
             mNotifier = ToastNotificationManager.CreateToastNotifier();
         }
 
@@ -28,45 +34,89 @@ namespace PushNotify.Core.Services
             ToastNotificationManager.History.Clear();
         }
 
-        public void Show(string id, string title, string message)
+        public void Show(PushoverMessage message)
         {
-            var visual = new ToastVisual
-            {
-                BindingGeneric = new ToastBindingGeneric
-                {
-                    Children =
-                    {
-                        new AdaptiveText
-                        {
-                            Text = title,
-                            HintStyle = AdaptiveTextStyle.Title
-                        },
-                        new AdaptiveText
-                        {
-                            Text = message,
-                            HintStyle = AdaptiveTextStyle.Body
-                        }
-                    }
-                }
-            };
-            var actions = new ToastActionsCustom
-            {
-            };
-            var content = new ToastContent
-            {
-                Visual = visual,
-                Actions = actions
-            };
+            var content = _CreateToastContent(message);
 
             var xml = content.GetXml();
             var toast = new ToastNotification(xml)
             {
                 ExpirationTime = DateTimeOffset.Now.AddDays(2),
-                Tag = id,
+                Tag = message.Id.ToString(),
                 Group = NOTIFICATION_GROUP
             };
 
+            if(mLog.IsTraceEnabled)
+            {
+                mLog.Trace($"Show notification with xml: {xml.GetXml()}");
+            }
+
             mNotifier.Show(toast);
+        }
+
+        private static ToastActionsCustom _CreateActions(PushoverMessage message)
+        {
+            var actions = new ToastActionsCustom
+            {
+            };
+            return actions;
+        }
+
+        private static ToastAudio _CreateAudio(PushoverMessage message)
+        {
+            var audio = new ToastAudio();
+
+            if(!string.IsNullOrEmpty(message.Sound))
+            {
+                var uri = $"https://api.pushover.net/sounds/{message.Sound}.mp3";
+                audio.Src = new Uri(uri);
+            }
+
+            return audio;
+        }
+
+        private static ToastContent _CreateToastContent(PushoverMessage message)
+        {
+            var visual = _CreateVisual(message);
+            var actions = _CreateActions(message);
+            var audio = _CreateAudio(message);
+            var content = new ToastContent
+            {
+                Visual = visual,
+                Actions = actions,
+                Audio = audio,
+                Header = new ToastHeader(message.Id.ToString(), message.Title, "")
+            };
+            return content;
+        }
+
+        private static ToastVisual _CreateVisual(PushoverMessage message)
+        {
+            var iconUrl = $"https://api.pushover.net/icons/{message.Icon}.png";
+            var visual = new ToastVisual
+            {
+                BindingGeneric = new ToastBindingGeneric
+                {
+                    AppLogoOverride = new ToastGenericAppLogo
+                    {
+                        Source = iconUrl
+                    },
+                    Children =
+                    {
+                        new AdaptiveText
+                        {
+                            Text = message.Title,
+                            HintStyle = AdaptiveTextStyle.Title
+                        },
+                        new AdaptiveText
+                        {
+                            Text = message.Message,
+                            HintStyle = AdaptiveTextStyle.Body
+                        }
+                    }
+                }
+            };
+            return visual;
         }
     }
 }
