@@ -16,6 +16,8 @@ namespace PushNotify.Core.Services
     {
         IObservable<Option<PushoverAuth>> Authentication { get; }
 
+        IObservable<Config> Config { get; }
+
         void SetAuthentication(Option<PushoverAuth> auth);
 
         bool TryGetAuthentication(out PushoverAuth auth);
@@ -26,6 +28,7 @@ namespace PushNotify.Core.Services
         private const string SETTING_DEVICE_ID = "DeviceId";
         private const string VAULT_RESOURCE = "Push Notify";
         private readonly BehaviorSubject<Option<PushoverAuth>> mAuthentication = new BehaviorSubject<Option<PushoverAuth>>(Option<PushoverAuth>.None);
+        private readonly BehaviorSubject<Config> mConfig = new BehaviorSubject<Config>(new Config());
         private readonly IPropertySet mSettings;
         private readonly PasswordVault mVault;
 
@@ -36,6 +39,8 @@ namespace PushNotify.Core.Services
         }
 
         public IObservable<Option<PushoverAuth>> Authentication => mAuthentication;
+
+        public IObservable<Config> Config => mConfig;
 
         public void Initialize()
         {

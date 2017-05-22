@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Reactive.Disposables;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
@@ -21,20 +22,23 @@ namespace PushNotify.Core.Services
 
     public sealed class NotificationListenerService : INotificationListenerService, IDisposable
     {
-        private readonly IConfigService mConfig;
+        private readonly IConfigService mConfigService;
         private readonly CompositeDisposable mDisposables = new CompositeDisposable();
         private readonly ILogger mLog;
         private readonly IMessageService mMessageService;
         private readonly INotificationService mNotifier;
+        private Config mConfig = new Config();
         private Option<MessageWebSocket> mSocket = Option<MessageWebSocket>.None;
 
-        public NotificationListenerService(IConfigService config, INotificationService notifier, IMessageService messageService, ILogger log)
+        public NotificationListenerService(IConfigService configService, INotificationService notifier, IMessageService messageService, ILogger log)
         {
-            mConfig = config;
+            mConfigService = configService;
             mNotifier = notifier;
             mMessageService = messageService;
             mLog = log;
-            mConfig.Authentication.Subscribe(_HandleAuthChanged).AddTo(mDisposables);
+
+            mConfigService.Authentication.Subscribe(_HandleAuthChanged).AddTo(mDisposables);
+            mConfigService.Config.Subscribe(_HandleConfigChanged).AddTo(mDisposables);
         }
 
         private void _Disable(MessageWebSocket socket)
@@ -88,7 +92,7 @@ namespace PushNotify.Core.Services
         private Task _FailedConnection()
         {
             mLog.Fatal("Connection failed, invalidating login");
-            mConfig.SetAuthentication(Option<PushoverAuth>.None);
+            mConfigService.SetAuthentication(Option<PushoverAuth>.None);
 
             return Task.CompletedTask;
         }
@@ -106,6 +110,11 @@ namespace PushNotify.Core.Services
                 });
 
             mSocket = result;
+        }
+
+        private void _HandleConfigChanged(Config config)
+        {
+            mConfig = config;
         }
 
         private async void _HandleMessageReceived(MessageWebSocket sender, MessageWebSocketMessageReceivedEventArgs args)
@@ -167,7 +176,7 @@ namespace PushNotify.Core.Services
             mLog.Info("Reloading connection");
 
             mSocket.IfSome(new Action<MessageWebSocket>(_Disable));
-            if(mConfig.TryGetAuthentication(out PushoverAuth auth))
+            if(mConfigService.TryGetAuthentication(out PushoverAuth auth))
             {
                 mSocket = await _Enable(auth);
             }
@@ -176,6 +185,9 @@ namespace PushNotify.Core.Services
         private async Task _RetrieveNewMessages()
         {
             var messages = await mMessageService.FetchNewMessages();
+            var now = DateTimeOffset.Now;
+            var currentMessages = messages
+                .Where(msg => now < msg.Date || now.Subtract(msg.Date) <= mConfig.NotificationAgeThreshold);
             foreach(var message in messages)
             {
                 mNotifier.Show(message);

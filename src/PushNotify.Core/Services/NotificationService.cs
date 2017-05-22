@@ -20,7 +20,8 @@ namespace PushNotify.Core.Services
     public sealed class NotificationService : INotificationService
     {
         private readonly ILogger mLog;
-        private const string NOTIFICATION_GROUP = "DefaultNotificationGroup";
+        private const string GROUP_DEFAULT = "DefaultNotificationGroup";
+        private const string GROUP_SCHEDULED = "ScheduledNotificationGroup";
         private readonly ToastNotifier mNotifier;
 
         public NotificationService(ILogger log)
@@ -33,25 +34,34 @@ namespace PushNotify.Core.Services
         {
             ToastNotificationManager.History.Clear();
         }
-
+        
         public void Show(PushoverMessage message)
         {
             var content = _CreateToastContent(message);
 
             var xml = content.GetXml();
-            var toast = new ToastNotification(xml)
-            {
-                ExpirationTime = DateTimeOffset.Now.AddDays(2),
-                Tag = message.Id.ToString(),
-                Group = NOTIFICATION_GROUP
-            };
 
-            if(mLog.IsTraceEnabled)
+            if(DateTimeOffset.Now > message.Date)
             {
+                var toast = new ToastNotification(xml)
+                {
+                    ExpirationTime = DateTimeOffset.Now.AddDays(2),
+                    Tag = message.Id.ToString(),
+                    Group = GROUP_DEFAULT
+                };
                 mLog.Trace($"Show notification with xml: {xml.GetXml()}");
+                mNotifier.Show(toast);
             }
-
-            mNotifier.Show(toast);
+            else
+            {
+                var toast = new ScheduledToastNotification(xml, message.Date)
+                {
+                    Tag = message.Id.ToString(),
+                    Group = GROUP_SCHEDULED
+                };
+                mLog.Trace($"Schedule notification for {message.Date} with xml: {xml.GetXml()}");
+                mNotifier.AddToSchedule(toast);
+            }
         }
 
         private static ToastActionsCustom _CreateActions(PushoverMessage message)
